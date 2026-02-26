@@ -213,7 +213,8 @@ const s = StyleSheet.create({
     marginBottom: 4,
   },
   signatureIntroWarm: {
-    fontSize: 10,
+    fontFamily: "Cormorant Garamond",
+    fontSize: 11,
     color: colors.deepForest,
     fontStyle: "italic",
     lineHeight: 1.6,
@@ -426,7 +427,7 @@ export function ContractPDF({
         )}
 
         {/* Validity */}
-        <Text style={{ ...s.bodyText, marginTop: 12, fontStyle: "italic" }}>
+        <Text style={{ ...s.bodyText, marginTop: 12, fontFamily: "Cormorant Garamond", fontStyle: "italic" }}>
           This estimate is valid for {validDays} days from the date above.
           After that, material prices and availability may change and we'd want
           to provide you with updated pricing.
