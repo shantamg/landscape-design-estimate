@@ -99,6 +99,12 @@ function App() {
               />
             </TabsContent>
 
+            <TabsContent value="contracts">
+              <div className="rounded-lg border border-border bg-card p-6">
+                <ContractForm />
+              </div>
+            </TabsContent>
+
             <TabsContent value="settings">
               <SettingsPage />
             </TabsContent>

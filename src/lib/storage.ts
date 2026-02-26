@@ -1,9 +1,10 @@
-import type { Estimate, Settings, CatalogItem } from "@/types";
+import type { Estimate, Settings, CatalogItem, Contract } from "@/types";
 import { generateEstimateNumber } from "./estimate-utils";
 
 // --- Storage Keys ---
 const KEYS = {
   estimates: "nlgd_estimates",
+  contracts: "nlgd_contracts",
   settings: "nlgd_settings",
   plantCatalog: "nlgd_plant_catalog",
   serviceCatalog: "nlgd_service_catalog",
@@ -143,6 +144,37 @@ export function incrementEstimateNumber(): void {
   const settings = loadSettings();
   settings.nextEstimateNumber++;
   saveSettings(settings);
+}
+
+// --- Contract CRUD ---
+
+export function listContracts(): Contract[] {
+  return getItem<Contract[]>(KEYS.contracts) ?? [];
+}
+
+export function loadContract(id: string): Contract | null {
+  const contracts = listContracts();
+  return contracts.find((c) => c.id === id) ?? null;
+}
+
+export function saveContract(contract: Contract): void {
+  const contracts = listContracts();
+  const index = contracts.findIndex((c) => c.id === contract.id);
+
+  const updated = { ...contract, updatedAt: new Date().toISOString() };
+
+  if (index >= 0) {
+    contracts[index] = updated;
+  } else {
+    contracts.push(updated);
+  }
+
+  setItem(KEYS.contracts, contracts);
+}
+
+export function deleteContract(id: string): void {
+  const contracts = listContracts().filter((c) => c.id !== id);
+  setItem(KEYS.contracts, contracts);
 }
 
 // --- Catalog ---
