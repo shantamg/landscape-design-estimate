@@ -6,6 +6,8 @@ import {
   EstimateProvider,
   createBlankEstimate,
 } from "@/context/EstimateContext";
+import { EstimateForm } from "@/components/estimate-form/EstimateForm";
+import { sampleEstimate } from "@/data/sample-estimate";
 import type { CatalogItem } from "@/types";
 import defaultCatalog from "@/data/default-catalog.json";
 
@@ -20,15 +22,22 @@ function App() {
     initializeCatalog(defaultCatalog as CatalogItem[]);
     const settings = loadSettings();
     const estimateNumber = getNextEstimateNumber();
-    setInitialEstimate(
-      createBlankEstimate(estimateNumber, {
-        taxRate: settings.defaults.taxRate,
-        validDays: settings.defaults.validDays,
-        terms: settings.defaults.terms,
-        warranty: settings.defaults.warranty,
-        exclusions: settings.defaults.exclusions,
-      })
-    );
+
+    // Load sample estimate for demo, or create blank
+    const useSample = true; // Toggle for demo mode
+    if (useSample) {
+      setInitialEstimate(sampleEstimate);
+    } else {
+      setInitialEstimate(
+        createBlankEstimate(estimateNumber, {
+          taxRate: settings.defaults.taxRate,
+          validDays: settings.defaults.validDays,
+          terms: settings.defaults.terms,
+          warranty: settings.defaults.warranty,
+          exclusions: settings.defaults.exclusions,
+        })
+      );
+    }
     setInitialized(true);
   }, []);
 
@@ -57,14 +66,7 @@ function App() {
             </TabsList>
 
             <TabsContent value="new">
-              <div className="rounded-lg border border-border bg-card p-6">
-                <h2 className="text-xl font-heading font-bold mb-4">
-                  New Estimate
-                </h2>
-                <p className="text-muted-foreground">
-                  Estimate form will be built here.
-                </p>
-              </div>
+              <EstimateForm />
             </TabsContent>
 
             <TabsContent value="saved">
