@@ -1,50 +1,72 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Toaster } from "@/components/ui/sonner";
-import { loadSettings, initializeCatalog, getNextEstimateNumber } from "@/lib/storage";
+import {
+  loadSettings,
+  initializeCatalog,
+  getNextEstimateNumber,
+  incrementEstimateNumber,
+  loadEstimate,
+} from "@/lib/storage";
 import {
   EstimateProvider,
   createBlankEstimate,
 } from "@/context/EstimateContext";
 import { EstimateForm } from "@/components/estimate-form/EstimateForm";
+import { EstimateList } from "@/components/estimate-list/EstimateList";
+import { SettingsPage } from "@/components/settings/SettingsPage";
 import { sampleEstimate } from "@/data/sample-estimate";
-import type { CatalogItem } from "@/types";
+import type { CatalogItem, Estimate } from "@/types";
 import defaultCatalog from "@/data/default-catalog.json";
+import { ContractForm } from "@/components/contract/ContractForm";
 
 function App() {
   const [initialized, setInitialized] = useState(false);
-  const [initialEstimate, setInitialEstimate] = useState(() =>
+  const [activeTab, setActiveTab] = useState("new");
+  const [currentEstimate, setCurrentEstimate] = useState<Estimate>(() =>
     createBlankEstimate("NL-2026-001")
   );
+  // Key to force re-mount EstimateProvider when loading a different estimate
+  const [estimateKey, setEstimateKey] = useState(0);
 
   useEffect(() => {
     // Initialize catalog and settings on first load
     initializeCatalog(defaultCatalog as CatalogItem[]);
+
+    // Load sample estimate for demo
+    setCurrentEstimate(sampleEstimate);
+    setInitialized(true);
+  }, []);
+
+  const handleNewEstimate = useCallback(() => {
     const settings = loadSettings();
     const estimateNumber = getNextEstimateNumber();
+    incrementEstimateNumber();
+    const blank = createBlankEstimate(estimateNumber, {
+      taxRate: settings.defaults.taxRate,
+      validDays: settings.defaults.validDays,
+      terms: settings.defaults.terms,
+      warranty: settings.defaults.warranty,
+      exclusions: settings.defaults.exclusions,
+    });
+    setCurrentEstimate(blank);
+    setEstimateKey((k) => k + 1);
+    setActiveTab("new");
+  }, []);
 
-    // Load sample estimate for demo, or create blank
-    const useSample = true; // Toggle for demo mode
-    if (useSample) {
-      setInitialEstimate(sampleEstimate);
-    } else {
-      setInitialEstimate(
-        createBlankEstimate(estimateNumber, {
-          taxRate: settings.defaults.taxRate,
-          validDays: settings.defaults.validDays,
-          terms: settings.defaults.terms,
-          warranty: settings.defaults.warranty,
-          exclusions: settings.defaults.exclusions,
-        })
-      );
+  const handleOpenEstimate = useCallback((id: string) => {
+    const est = loadEstimate(id);
+    if (est) {
+      setCurrentEstimate(est);
+      setEstimateKey((k) => k + 1);
+      setActiveTab("new");
     }
-    setInitialized(true);
   }, []);
 
   if (!initialized) return null;
 
   return (
-    <EstimateProvider initialEstimate={initialEstimate}>
+    <EstimateProvider key={estimateKey} initialEstimate={currentEstimate}>
       <div className="min-h-screen bg-background">
         <header className="border-b border-border bg-card px-6 py-4">
           <div className="mx-auto max-w-6xl flex items-center justify-between">
@@ -58,10 +80,11 @@ function App() {
         </header>
 
         <main className="mx-auto max-w-6xl px-6 py-6">
-          <Tabs defaultValue="new" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className="mb-6">
               <TabsTrigger value="new">New Estimate</TabsTrigger>
               <TabsTrigger value="saved">Saved Estimates</TabsTrigger>
+              <TabsTrigger value="contracts">Contracts</TabsTrigger>
               <TabsTrigger value="settings">Settings</TabsTrigger>
             </TabsList>
 
@@ -70,25 +93,14 @@ function App() {
             </TabsContent>
 
             <TabsContent value="saved">
-              <div className="rounded-lg border border-border bg-card p-6">
-                <h2 className="text-xl font-heading font-bold mb-4">
-                  Saved Estimates
-                </h2>
-                <p className="text-muted-foreground">
-                  Estimate list will be built here.
-                </p>
-              </div>
+              <EstimateList
+                onOpenEstimate={handleOpenEstimate}
+                onNewEstimate={handleNewEstimate}
+              />
             </TabsContent>
 
             <TabsContent value="settings">
-              <div className="rounded-lg border border-border bg-card p-6">
-                <h2 className="text-xl font-heading font-bold mb-4">
-                  Settings
-                </h2>
-                <p className="text-muted-foreground">
-                  Settings page will be built here.
-                </p>
-              </div>
+              <SettingsPage />
             </TabsContent>
           </Tabs>
         </main>
