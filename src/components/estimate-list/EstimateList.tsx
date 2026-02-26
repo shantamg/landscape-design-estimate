@@ -5,18 +5,22 @@ import { EstimateCard } from "./EstimateCard";
 import {
   listEstimates,
   deleteEstimate,
-  duplicateEstimate,
 } from "@/lib/storage";
 import type { Estimate } from "@/types";
+import { toast } from "sonner";
 
 interface EstimateListProps {
   onOpenEstimate: (id: string) => void;
   onNewEstimate: () => void;
+  onCreateContract?: (estimateId: string) => void;
+  onDuplicate?: (id: string) => void;
 }
 
 export function EstimateList({
   onOpenEstimate,
   onNewEstimate,
+  onCreateContract,
+  onDuplicate,
 }: EstimateListProps) {
   const [estimates, setEstimates] = useState<Estimate[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -33,13 +37,17 @@ export function EstimateList({
     if (!window.confirm("Delete this estimate? This cannot be undone.")) return;
     deleteEstimate(id);
     refreshList();
+    toast.success("Estimate deleted");
   }
 
   function handleDuplicate(id: string) {
-    const dup = duplicateEstimate(id);
-    if (dup) {
-      refreshList();
-    }
+    onDuplicate?.(id);
+    // Refresh to show the duplicate
+    setTimeout(refreshList, 50);
+  }
+
+  function handleCreateContract(id: string) {
+    onCreateContract?.(id);
   }
 
   // Filter by search
@@ -80,7 +88,7 @@ export function EstimateList({
           <p className="text-muted-foreground">
             {searchQuery
               ? "No estimates match your search."
-              : "No saved estimates yet."}
+              : "No saved estimates yet. Create your first estimate!"}
           </p>
           {!searchQuery && (
             <Button
@@ -101,6 +109,7 @@ export function EstimateList({
               onOpen={onOpenEstimate}
               onDuplicate={handleDuplicate}
               onDelete={handleDelete}
+              onCreateContract={handleCreateContract}
             />
           ))}
         </div>

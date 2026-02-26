@@ -115,9 +115,13 @@ function generateContractNumber(): string {
 
 // --- Component ---
 
-export function ContractForm() {
+interface ContractFormProps {
+  preSelectedEstimateId?: string;
+}
+
+export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
   const [estimates, setEstimates] = useState<Estimate[]>([]);
-  const [selectedEstimateId, setSelectedEstimateId] = useState<string>("");
+  const [selectedEstimateId, setSelectedEstimateId] = useState<string>(preSelectedEstimateId || "");
   const [selectedEstimate, setSelectedEstimate] = useState<Estimate | null>(
     null
   );
@@ -139,6 +143,13 @@ export function ContractForm() {
     const allEstimates = listEstimates();
     setEstimates(allEstimates);
   }, []);
+
+  // React to preSelectedEstimateId prop changes
+  useEffect(() => {
+    if (preSelectedEstimateId) {
+      setSelectedEstimateId(preSelectedEstimateId);
+    }
+  }, [preSelectedEstimateId]);
 
   // Load selected estimate details
   useEffect(() => {

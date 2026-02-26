@@ -115,3 +115,19 @@
         font-family: var(--font-body);
     }
 }
+
+/* Print styles: hide UI chrome, show only estimate content */
+@media print {
+    .print\:hidden {
+        display: none !important;
+    }
+
+    body {
+        background: white !important;
+    }
+
+    main {
+        padding: 0 !important;
+        max-width: none !important;
+    }
+}

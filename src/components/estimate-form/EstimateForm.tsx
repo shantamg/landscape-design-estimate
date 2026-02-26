@@ -10,7 +10,11 @@ import { DesignFeeSection } from "./DesignFeeSection";
 import { TotalsSection } from "./TotalsSection";
 import { ActionBar } from "./ActionBar";
 
-export function EstimateForm() {
+interface EstimateFormProps {
+  onRevisionCreated?: (id: string) => void;
+}
+
+export function EstimateForm({ onRevisionCreated }: EstimateFormProps) {
   const { estimate, dispatch } = useEstimate();
 
   return (
@@ -25,12 +29,6 @@ export function EstimateForm() {
 
       {/* Project Sections */}
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold text-forest uppercase tracking-wide">
-            Project Sections
-          </h3>
-        </div>
-
         {estimate.projectSections.map((section) => (
           <ProjectSectionEditor
             key={section.id}
@@ -42,7 +40,7 @@ export function EstimateForm() {
         <Button
           variant="outline"
           onClick={() => dispatch({ type: "ADD_PROJECT_SECTION" })}
-          className="gap-2"
+          className="gap-2 border-dashed border-sage/40 text-sage hover:text-sage-dark hover:border-sage"
         >
           <Plus className="size-4" />
           Add Project Section
@@ -56,7 +54,7 @@ export function EstimateForm() {
       <TotalsSection />
 
       {/* Action Bar */}
-      <ActionBar />
+      <ActionBar onRevisionCreated={onRevisionCreated} />
     </div>
   );
 }
