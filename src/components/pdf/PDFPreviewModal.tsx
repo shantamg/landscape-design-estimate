@@ -38,9 +38,9 @@ export function PDFPreviewModal({
           </Button>
         )}
       </DialogTrigger>
-      <DialogContent className="max-w-5xl h-[90vh] flex flex-col">
+      <DialogContent className="max-w-5xl h-[90vh] flex flex-col" showCloseButton={false}>
         <DialogHeader className="flex-none">
-          <div className="flex items-center justify-between pr-8">
+          <div className="flex items-center justify-between">
             <DialogTitle>
               Estimate Preview &mdash; {estimate.estimateNumber}
             </DialogTitle>

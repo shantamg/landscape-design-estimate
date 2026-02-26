@@ -53,14 +53,12 @@ interface PDFLineItemTableProps {
   title: string;
   items: LineItem[];
   sectionType: SectionType;
-  showSubtotal?: boolean;
 }
 
 export function PDFLineItemTable({
   title,
   items,
   sectionType,
-  showSubtotal = true,
 }: PDFLineItemTableProps) {
   if (items.length === 0) return null;
 
@@ -69,15 +67,9 @@ export function PDFLineItemTable({
 
   return (
     <View wrap={false} style={{ marginBottom: 4 }}>
-      {/* Category header with dotted leader line */}
-      <View style={styles.categoryHeaderRow}>
+      {/* Category header */}
+      <View style={styles.categoryHeaderRow} minPresenceAhead={60}>
         <Text style={styles.categoryHeaderText}>{title.toUpperCase()}</Text>
-        <View style={styles.categoryLeaderDots} />
-        {showSubtotal && (
-          <Text style={styles.categorySubtotalText}>
-            {formatCurrency(subtotal)}
-          </Text>
-        )}
       </View>
 
       {/* Column headers */}
@@ -124,18 +116,10 @@ export function PDFLineItemTable({
       ))}
 
       {/* Subtotal row */}
-      {showSubtotal && (
-        <View style={styles.subtotalRow}>
-          <View style={{ width: "84%" }}>
-            <Text style={styles.subtotalLabel}>Subtotal</Text>
-          </View>
-          <View style={{ width: "16%" }}>
-            <Text style={styles.subtotalValue}>
-              {formatCurrency(subtotal)}
-            </Text>
-          </View>
-        </View>
-      )}
+      <View style={styles.subtotalRow}>
+        <Text style={styles.subtotalLabel}>{title} Subtotal</Text>
+        <Text style={styles.subtotalValue}>{formatCurrency(subtotal)}</Text>
+      </View>
     </View>
   );
 }
@@ -165,8 +149,8 @@ export function PDFProjectSection({
 
   return (
     <View style={{ marginBottom: 6 }}>
-      {/* Section name header */}
-      <Text style={styles.sectionHeader}>{sectionName}</Text>
+      {/* Section name header — minPresenceAhead keeps it with content below */}
+      <Text style={styles.sectionHeader} minPresenceAhead={80}>{sectionName}</Text>
 
       {/* Category tables in specified order: Plant, Labor, Materials */}
       <PDFLineItemTable
@@ -199,24 +183,12 @@ export function PDFDesignFeeSection({ items }: PDFDesignFeeSectionProps) {
 
   return (
     <View style={{ marginBottom: 6 }}>
-      <Text style={styles.sectionHeader}>Design Fee</Text>
+      <Text style={styles.sectionHeader} minPresenceAhead={80}>Design Fee</Text>
       <PDFLineItemTable
         title="Design Fee"
         items={items}
         sectionType="designFee"
-        showSubtotal={false}
       />
-      {/* Show total for design fee */}
-      <View style={{ ...styles.subtotalRow, marginTop: 0 }}>
-        <View style={{ width: "84%" }}>
-          <Text style={styles.subtotalLabel}>Design Fee Total</Text>
-        </View>
-        <View style={{ width: "16%" }}>
-          <Text style={styles.subtotalValue}>
-            {formatCurrency(computeSectionSubtotal(items))}
-          </Text>
-        </View>
-      </View>
     </View>
   );
 }

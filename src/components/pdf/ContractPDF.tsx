@@ -223,7 +223,7 @@ const s = StyleSheet.create({
   signatureRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 24,
+    marginBottom: 12,
   },
   signatureLabel: {
     fontSize: 9,
@@ -442,29 +442,47 @@ export function ContractPDF({
             We're excited to bring your garden to life!
           </Text>
 
+          {/* Column headers */}
           <View style={s.signatureRow}>
-            {/* Client Signature */}
             <View style={s.signatureBlock}>
-              <Text style={s.signatureLabel}>Client Signature</Text>
-              <View style={{ ...s.signatureLine, width: "100%", height: 28 }} />
-              <Text style={{ ...s.signatureLabel, marginTop: 16 }}>
-                Printed Name
-              </Text>
-              <View style={{ ...s.signatureLine, width: "100%", height: 20 }} />
-              <Text style={{ ...s.signatureLabel, marginTop: 12 }}>Date</Text>
-              <View style={{ ...s.signatureLine, width: "60%", height: 20 }} />
+              <Text style={s.signatureLabel}>Client</Text>
             </View>
-
-            {/* Contractor Signature */}
             <View style={s.signatureBlock}>
-              <Text style={s.companySignatureName}>
-                {company.name}
-              </Text>
+              <Text style={s.companySignatureName}>{company.name}</Text>
+            </View>
+          </View>
+
+          {/* Row 1: Signature */}
+          <View style={s.signatureRow}>
+            <View style={s.signatureBlock}>
               <Text style={s.signatureLabel}>Signature</Text>
               <View style={{ ...s.signatureLine, width: "100%", height: 28 }} />
-              <Text style={{ ...s.signatureLabel, marginTop: 16 }}>Date</Text>
+            </View>
+            <View style={s.signatureBlock}>
+              <Text style={s.signatureLabel}>Signature</Text>
+              <View style={{ ...s.signatureLine, width: "100%", height: 28 }} />
+            </View>
+          </View>
+
+          {/* Row 2: Printed Name / Date */}
+          <View style={s.signatureRow}>
+            <View style={s.signatureBlock}>
+              <Text style={s.signatureLabel}>Printed Name</Text>
+              <View style={{ ...s.signatureLine, width: "100%", height: 20 }} />
+            </View>
+            <View style={s.signatureBlock}>
+              <Text style={s.signatureLabel}>Date</Text>
               <View style={{ ...s.signatureLine, width: "60%", height: 20 }} />
             </View>
+          </View>
+
+          {/* Row 3: Date */}
+          <View style={s.signatureRow}>
+            <View style={s.signatureBlock}>
+              <Text style={s.signatureLabel}>Date</Text>
+              <View style={{ ...s.signatureLine, width: "60%", height: 20 }} />
+            </View>
+            <View style={s.signatureBlock} />
           </View>
         </View>
 

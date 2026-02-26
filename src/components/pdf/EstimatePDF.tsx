@@ -1,4 +1,4 @@
-import { Document, Page, View, Text, Font } from "@react-pdf/renderer";
+import { Document, Page, Font } from "@react-pdf/renderer";
 import type { Estimate, CompanyInfo } from "@/types";
 import { styles } from "./pdf-styles";
 import { PDFHeader } from "./PDFHeader";
@@ -56,13 +56,10 @@ export function EstimatePDF({ estimate, company }: EstimatePDFProps) {
       subject={`Landscape estimate for ${estimate.client.name || estimate.client.address}`}
     >
       <Page size="LETTER" style={styles.page}>
-        {/* Page 1 full header */}
+        {/* Letterhead */}
         <PDFHeader company={company} isFirstPage={true} />
 
-        {/* Title */}
-        <Text style={styles.estimateTitle}>LANDSCAPE ESTIMATE</Text>
-
-        {/* Client info + estimate number */}
+        {/* Client info + estimate details */}
         <PDFClientInfo
           client={estimate.client}
           estimateNumber={estimate.estimateNumber}
@@ -92,31 +89,7 @@ export function EstimatePDF({ estimate, company }: EstimatePDFProps) {
         <PDFSummary estimate={estimate} />
 
         {/* Footer on every page */}
-        <PDFFooter companyName={company.name} />
-
-        {/* Condensed header on pages 2+ */}
-        <View
-          style={styles.headerCondensed}
-          fixed
-          render={({ pageNumber }) => {
-            if (pageNumber === 1) return <View />;
-            return (
-              <View style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                width: "100%",
-              }}>
-                <Text style={styles.headerCondensedName}>
-                  {company.name}
-                </Text>
-                <Text style={styles.headerCondensedPage}>
-                  Estimate {estimate.estimateNumber}
-                </Text>
-              </View>
-            );
-          }}
-        />
+        <PDFFooter companyName={company.name} estimateNumber={estimate.estimateNumber} />
       </Page>
     </Document>
   );

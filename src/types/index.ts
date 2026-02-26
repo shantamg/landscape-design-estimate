@@ -150,6 +150,8 @@ export interface Settings {
     terms: string;
     warranty: string;
     exclusions: string;
+    designFeeDescription: string;
+    designFeePrice: number;
   };
 
   estimateNumberPrefix: string; // "NL"

@@ -17,8 +17,8 @@ export function ActionBar({ onRevisionCreated }: ActionBarProps) {
   const [exporting, setExporting] = useState(false);
 
   function validate(): boolean {
-    if (!estimate.client.name.trim()) {
-      toast.error("Client name is required before saving.");
+    if (!estimate.client.name.trim() && !estimate.client.address.trim()) {
+      toast.error("Client name or address is required before saving.");
       return false;
     }
     const hasItems =
@@ -55,8 +55,8 @@ export function ActionBar({ onRevisionCreated }: ActionBarProps) {
   }
 
   async function handleExportPDF() {
-    if (!estimate.client.name.trim()) {
-      toast.error("Add a client name before exporting.");
+    if (!estimate.client.name.trim() && !estimate.client.address.trim()) {
+      toast.error("Add a client name or address before exporting.");
       return;
     }
     setExporting(true);

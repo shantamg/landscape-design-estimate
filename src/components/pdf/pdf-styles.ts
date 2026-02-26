@@ -43,78 +43,46 @@ export const styles = StyleSheet.create({
   // Header (page 1)
   headerContainer: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 20,
-    paddingBottom: 14,
+    alignItems: "center",
+    marginBottom: 24,
+    paddingBottom: 12,
     borderBottomWidth: 1.5,
     borderBottomColor: colors.sageGreen,
   },
   headerLogo: {
-    width: 65,
-    height: 65,
-    marginRight: 14,
+    width: 40,
+    height: 40,
+    marginRight: 10,
   },
   headerTextBlock: {
     flex: 1,
+    justifyContent: "center" as const,
   },
   headerCompanyName: {
     fontFamily: "Cormorant Garamond",
-    fontSize: 20,
-    fontWeight: "bold",
-    color: colors.deepForest,
-    letterSpacing: 1.5,
-    marginBottom: 3,
-  },
-  headerContactLine: {
-    fontSize: 8.5,
-    color: colors.warmStone,
-    marginBottom: 1,
-  },
-
-  // Condensed header (subsequent pages)
-  headerCondensed: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 14,
-    paddingBottom: 8,
-    borderBottomWidth: 0.75,
-    borderBottomColor: colors.sageGreen,
-  },
-  headerCondensedName: {
-    fontFamily: "Cormorant Garamond",
-    fontSize: 11,
-    fontWeight: "bold",
-    color: colors.deepForest,
-    letterSpacing: 1,
-  },
-  headerCondensedPage: {
-    fontSize: 8,
-    color: colors.warmStone,
-  },
-
-  // Title
-  estimateTitle: {
-    fontFamily: "Cormorant Garamond",
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: "bold",
     color: colors.sageGreen,
-    letterSpacing: 2,
-    textAlign: "center",
-    marginBottom: 18,
+    letterSpacing: 1.5,
+    marginBottom: 2,
+  },
+  headerContactLine: {
+    fontSize: 8,
+    color: colors.warmStone,
+    marginBottom: 1,
   },
 
   // Client info
   clientSection: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 18,
+    marginBottom: 20,
   },
   clientLeft: {
     flex: 1,
   },
   clientRight: {
-    width: 180,
+    width: 160,
     alignItems: "flex-end",
   },
   clientLabel: {
@@ -136,15 +104,6 @@ export const styles = StyleSheet.create({
     color: colors.deepForest,
     marginBottom: 1,
   },
-  estimateNumberLabel: {
-    fontFamily: "Cormorant Garamond",
-    fontSize: 9,
-    fontWeight: "bold",
-    color: colors.sageGreen,
-    letterSpacing: 1.5,
-    marginBottom: 4,
-    textAlign: "right",
-  },
   estimateNumberValue: {
     fontSize: 11,
     fontWeight: "bold",
@@ -153,7 +112,7 @@ export const styles = StyleSheet.create({
     marginBottom: 2,
   },
   estimateDetail: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: colors.warmStone,
     textAlign: "right",
     marginBottom: 1,
@@ -257,16 +216,17 @@ export const styles = StyleSheet.create({
   // Subtotal row
   subtotalRow: {
     flexDirection: "row",
+    justifyContent: "space-between",
     borderTopWidth: 0.75,
     borderTopColor: colors.warmStone,
     paddingTop: 4,
     marginTop: 2,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   subtotalLabel: {
     fontSize: 9,
-    fontWeight: "bold",
-    color: colors.deepForest,
+    fontWeight: 600,
+    color: colors.warmStone,
   },
   subtotalValue: {
     fontSize: 9.5,

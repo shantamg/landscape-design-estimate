@@ -5,11 +5,8 @@ import { EstimateCard } from "./EstimateCard";
 import {
   listEstimates,
   deleteEstimate,
-  saveEstimate,
-  loadEstimate,
 } from "@/lib/storage";
 import type { Estimate } from "@/types";
-import { sampleEstimate } from "@/data/sample-estimate";
 import { toast } from "sonner";
 
 interface EstimateListProps {
@@ -53,18 +50,6 @@ export function EstimateList({
     onCreateContract?.(id);
   }
 
-  function handleLoadSample() {
-    const existing = loadEstimate(sampleEstimate.id);
-    if (existing) {
-      toast.info("Sample estimate already loaded.");
-      return;
-    }
-    const now = new Date().toISOString();
-    saveEstimate({ ...sampleEstimate, createdAt: now, updatedAt: now });
-    refreshList();
-    toast.success("Sample estimate loaded — 200 S. Bentley Ave");
-  }
-
   // Filter by search
   const filtered = estimates.filter((est) => {
     if (!searchQuery) return true;
@@ -92,13 +77,6 @@ export function EstimateList({
         />
         <div className="ml-auto flex items-center gap-2">
           <Button
-            variant="outline"
-            onClick={handleLoadSample}
-            className="text-stone hover:text-forest"
-          >
-            Load Sample Estimate
-          </Button>
-          <Button
             onClick={onNewEstimate}
             className="bg-sage hover:bg-sage-dark"
           >
@@ -109,9 +87,7 @@ export function EstimateList({
 
       {sorted.length === 0 ? (
         <div className="rounded-lg border-2 border-dashed border-sage/20 p-16 text-center">
-          <div className="w-12 h-12 rounded-full bg-sage/10 flex items-center justify-center mx-auto mb-4">
-            <span className="text-sage text-lg font-heading font-bold">NL</span>
-          </div>
+          <img src="/logo.png" alt="Nancy Lyons Garden Design" className="w-12 h-12 mx-auto mb-4 opacity-40" />
           <p className="text-muted-foreground mb-1">
             {searchQuery
               ? "No estimates match your search."

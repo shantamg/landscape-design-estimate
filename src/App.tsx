@@ -20,9 +20,21 @@ import type { CatalogItem, Estimate } from "@/types";
 import defaultCatalog from "@/data/default-catalog.json";
 import { ContractForm } from "@/components/contract/ContractForm";
 import { AuthStatus } from "@/components/auth/AuthStatus";
+import { LoginPage } from "@/components/auth/LoginPage";
+import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 
 function App() {
+  const { isConfigured, isAuthenticated } = useAuth();
+
+  if (isConfigured && !isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return <AppContent />;
+}
+
+function AppContent() {
   const [initialized, setInitialized] = useState(false);
   const [activeTab, setActiveTab] = useState("new");
   const [currentEstimate, setCurrentEstimate] = useState<Estimate | null>(null);
@@ -44,6 +56,8 @@ function App() {
       terms: settings.defaults.terms,
       warranty: settings.defaults.warranty,
       exclusions: settings.defaults.exclusions,
+      designFeeDescription: settings.defaults.designFeeDescription,
+      designFeePrice: settings.defaults.designFeePrice,
     });
     setCurrentEstimate(blank);
     setInitialized(true);
@@ -59,6 +73,8 @@ function App() {
       terms: settings.defaults.terms,
       warranty: settings.defaults.warranty,
       exclusions: settings.defaults.exclusions,
+      designFeeDescription: settings.defaults.designFeeDescription,
+      designFeePrice: settings.defaults.designFeePrice,
     });
     setCurrentEstimate(blank);
     setEstimateKey((k) => k + 1);
@@ -103,9 +119,7 @@ function App() {
         <header className="border-b-2 border-sage/30 bg-card px-6 py-5 print:hidden">
           <div className="mx-auto max-w-6xl flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-sage/15 flex items-center justify-center text-sage-dark font-heading text-lg font-bold shrink-0">
-                NL
-              </div>
+              <img src="/logo.png" alt="Nancy Lyons Garden Design" className="w-10 h-10 shrink-0" />
               <div>
                 <h1 className="text-xl font-heading font-bold text-forest tracking-wide">
                   Nancy Lyons Garden Design

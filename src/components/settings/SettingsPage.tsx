@@ -207,6 +207,34 @@ export function SettingsPage() {
             />
           </div>
         </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="designFeeDescription">Default Design Fee Description</Label>
+            <Input
+              id="designFeeDescription"
+              value={settings.defaults.designFeeDescription}
+              onChange={(e) => updateDefaults("designFeeDescription", e.target.value)}
+              placeholder="Design Fee — Property design"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="designFeePrice">Default Design Fee ($)</Label>
+            <Input
+              id="designFeePrice"
+              type="number"
+              min={0}
+              step={100}
+              value={settings.defaults.designFeePrice}
+              onChange={(e) =>
+                updateDefaults("designFeePrice", parseFloat(e.target.value) || 0)
+              }
+            />
+          </div>
+          <p className="text-xs text-muted-foreground sm:col-span-3">
+            New estimates will include this design fee automatically. Set price to $0 to start without one.
+          </p>
+        </div>
       </section>
 
       {/* Default Terms */}

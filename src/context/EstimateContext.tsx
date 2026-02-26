@@ -253,9 +253,25 @@ export function createBlankEstimate(
     terms?: string;
     warranty?: string;
     exclusions?: string;
+    designFeeDescription?: string;
+    designFeePrice?: number;
   }
 ): Estimate {
   const now = new Date().toISOString();
+
+  const designFee: LineItem[] = [];
+  if (defaults?.designFeeDescription && defaults?.designFeePrice != null && defaults.designFeePrice > 0) {
+    designFee.push({
+      id: uuidv4(),
+      category: "Labor",
+      description: defaults.designFeeDescription,
+      quantity: 1,
+      unit: "lot",
+      unitPrice: defaults.designFeePrice,
+      total: defaults.designFeePrice,
+    });
+  }
+
   return {
     id: uuidv4(),
     estimateNumber,
@@ -278,7 +294,7 @@ export function createBlankEstimate(
     estimatedStartDate: "",
     estimatedDuration: "",
     projectSections: [createEmptySection("Main")],
-    designFee: [],
+    designFee,
     taxRate: defaults?.taxRate ?? 9.5,
     taxableCategories: ["Planting", "Other"],
     paymentSchedule: {

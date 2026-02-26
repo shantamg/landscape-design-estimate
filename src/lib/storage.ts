@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS: Settings = {
     state: "CA",
     zip: "",
     phone: "310-630-9711",
-    email: "nlgardendesign@earthlink.net",
+    email: "nancylyonsdesign@gmail.com",
     website: "",
     licenseNumber: "",
     logo: "",
@@ -44,6 +44,8 @@ const DEFAULT_SETTINGS: Settings = {
       "All plants are guaranteed for 30 days from the date of installation, provided that the irrigation system is properly maintained and functioning. Hardscape work is guaranteed for one year against defects in workmanship.",
     exclusions:
       "This estimate does not include permits, engineering, or structural work unless specifically noted. Any unforeseen conditions discovered during construction may result in additional charges, which will be discussed and approved before proceeding.",
+    designFeeDescription: "Design Fee — Property design",
+    designFeePrice: 5000,
   },
   estimateNumberPrefix: "NL",
   nextEstimateNumber: 1,

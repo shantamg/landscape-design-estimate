@@ -76,7 +76,7 @@ export function ContractPreviewModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl h-[85vh] flex flex-col">
+      <DialogContent className="max-w-4xl h-[85vh] flex flex-col" showCloseButton={false}>
         <DialogHeader className="flex flex-row items-center justify-between">
           <DialogTitle className="font-heading">
             Contract Preview - {contract.contractNumber}

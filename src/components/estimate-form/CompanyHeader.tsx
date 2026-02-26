@@ -13,9 +13,11 @@ export function CompanyHeader() {
           className="w-14 h-14 rounded-full object-cover shrink-0 ring-2 ring-sage/10"
         />
       ) : (
-        <div className="w-14 h-14 rounded-full bg-sage/15 flex items-center justify-center text-sage-dark font-heading text-2xl font-bold shrink-0 ring-2 ring-sage/10">
-          NL
-        </div>
+        <img
+          src="/logo.png"
+          alt={name}
+          className="w-14 h-14 shrink-0"
+        />
       )}
       <div>
         <h2 className="text-lg font-heading font-bold text-forest tracking-wide">{name}</h2>

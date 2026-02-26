@@ -55,16 +55,15 @@ export function PDFClientInfo({
       </View>
 
       <View style={styles.clientRight}>
-        <Text style={styles.estimateNumberLabel}>ESTIMATE</Text>
         <Text style={styles.estimateNumberValue}>{estimateNumber}</Text>
         {createdAt && (
           <Text style={styles.estimateDetail}>
-            Date: {formatDate(createdAt)}
+            {formatDate(createdAt)}
           </Text>
         )}
         {validUntil && (
           <Text style={styles.estimateDetail}>
-            Valid until: {formatDate(validUntil)}
+            Valid until {formatDate(validUntil)}
           </Text>
         )}
       </View>
