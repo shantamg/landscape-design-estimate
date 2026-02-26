@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import {
   listEstimates,
@@ -285,34 +284,34 @@ export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-heading font-bold">New Contract</h2>
-          <p className="text-sm text-muted-foreground">
+          <h2 className="text-xl font-heading font-bold text-forest">New Contract</h2>
+          <p className="text-sm text-stone">
             Contract {contractNumber}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={handleSave}>
+          <Button variant="outline" size="sm" onClick={handleSave} className="gap-1.5">
             <Save className="size-4" />
             Save
           </Button>
-          <Button variant="outline" size="sm" onClick={handlePreview}>
+          <Button variant="outline" size="sm" onClick={handlePreview} className="gap-1.5">
             <Eye className="size-4" />
             Preview PDF
           </Button>
-          <Button size="sm" onClick={handleExportPDF}>
+          <Button size="sm" onClick={handleExportPDF} className="gap-1.5 bg-sage hover:bg-sage-dark">
             <Download className="size-4" />
             Export PDF
           </Button>
         </div>
       </div>
 
-      <Separator />
+      <div className="border-t border-sage/20" />
 
       {/* Linked Estimate Selector */}
       <div className="rounded-lg border border-border bg-card p-4 space-y-3">
         <div className="flex items-center gap-2">
           <FileText className="size-4 text-sage" />
-          <Label className="text-sm font-semibold uppercase tracking-wide text-sage-dark">
+          <Label className="text-xs font-semibold uppercase tracking-widest text-sage">
             Linked Estimate
           </Label>
         </div>
@@ -366,7 +365,7 @@ export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
 
       {/* Payment Schedule */}
       <div className="rounded-lg border border-border bg-card p-4 space-y-3">
-        <Label className="text-sm font-semibold uppercase tracking-wide text-sage-dark">
+        <Label className="text-xs font-semibold uppercase tracking-widest text-sage">
           Payment Schedule
         </Label>
 
@@ -406,7 +405,7 @@ export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
       <div className="rounded-lg border border-border bg-card p-4 space-y-2">
         <Label
           htmlFor="terms"
-          className="text-sm font-semibold uppercase tracking-wide text-sage-dark"
+          className="text-xs font-semibold uppercase tracking-widest text-sage"
         >
           Terms & Conditions
         </Label>
@@ -422,7 +421,7 @@ export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
       <div className="rounded-lg border border-border bg-card p-4 space-y-2">
         <Label
           htmlFor="warranty"
-          className="text-sm font-semibold uppercase tracking-wide text-sage-dark"
+          className="text-xs font-semibold uppercase tracking-widest text-sage"
         >
           Warranty
         </Label>
@@ -438,7 +437,7 @@ export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
       <div className="rounded-lg border border-border bg-card p-4 space-y-2">
         <Label
           htmlFor="exclusions"
-          className="text-sm font-semibold uppercase tracking-wide text-sage-dark"
+          className="text-xs font-semibold uppercase tracking-widest text-sage"
         >
           Exclusions
         </Label>
@@ -454,7 +453,7 @@ export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
       <div className="rounded-lg border border-border bg-card p-4 space-y-2">
         <Label
           htmlFor="change-orders"
-          className="text-sm font-semibold uppercase tracking-wide text-sage-dark"
+          className="text-xs font-semibold uppercase tracking-widest text-sage"
         >
           Change Order Process
         </Label>
@@ -477,15 +476,15 @@ export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
 
       {/* Bottom Actions */}
       <div className="flex justify-end gap-2 pb-4">
-        <Button variant="outline" onClick={handleSave}>
+        <Button variant="outline" onClick={handleSave} className="gap-1.5">
           <Save className="size-4" />
           Save Draft
         </Button>
-        <Button variant="outline" onClick={handlePreview}>
+        <Button variant="outline" onClick={handlePreview} className="gap-1.5">
           <Eye className="size-4" />
           Preview PDF
         </Button>
-        <Button onClick={handleExportPDF}>
+        <Button onClick={handleExportPDF} className="gap-1.5 bg-sage hover:bg-sage-dark">
           <Download className="size-4" />
           Export PDF
         </Button>

@@ -11,17 +11,17 @@ export function DesignFeeSection() {
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
-      <div className="flex items-center gap-2 px-5 py-3 bg-terracotta/10 border-b border-border">
-        <h3 className="text-base font-heading font-bold text-forest">
+      <div className="flex items-center gap-2 px-5 py-3.5 bg-terracotta/8 border-b border-terracotta/15">
+        <h3 className="text-base font-heading font-bold text-forest tracking-wide">
           Design Fee
         </h3>
-        <div className="ml-auto text-sm font-medium text-muted-foreground">
+        <div className="ml-auto text-sm font-semibold text-forest tabular-nums">
           {formatCurrency(subtotal)}
         </div>
       </div>
-      <div className="px-5 py-4 space-y-2">
+      <div className="px-6 py-5 space-y-2">
         {items.length > 0 && (
-          <div className="grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 text-xs text-muted-foreground font-medium uppercase tracking-wide px-0 pb-1">
+          <div className="grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 text-[10px] text-stone font-semibold uppercase tracking-wider pb-2 border-b border-stone/20 mb-1">
             <span>Description</span>
             <span className="text-right">Qty</span>
             <span>Unit</span>
@@ -55,7 +55,7 @@ export function DesignFeeSection() {
           variant="ghost"
           size="sm"
           onClick={() => dispatch({ type: "ADD_DESIGN_FEE_ITEM" })}
-          className="text-sage hover:text-sage-dark -ml-2"
+          className="text-sage hover:text-sage-dark hover:bg-sage/10 -ml-2"
         >
           <Plus className="size-4" />
           Add Design Fee Item

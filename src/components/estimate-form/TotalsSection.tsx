@@ -24,8 +24,8 @@ export function TotalsSection() {
   const grandTotal = computeGrandTotal(estimate);
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
-      <h3 className="text-sm font-semibold text-forest uppercase tracking-wide mb-4">
+    <div className="rounded-lg border-2 border-sage/30 bg-card p-6">
+      <h3 className="text-xs font-semibold text-sage uppercase tracking-widest mb-5">
         Cost Summary
       </h3>
 
@@ -40,7 +40,7 @@ export function TotalsSection() {
               className="flex justify-between text-sm"
             >
               <span className="text-muted-foreground">{section.name}</span>
-              <span>{formatCurrency(sectionTotal)}</span>
+              <span className="tabular-nums">{formatCurrency(sectionTotal)}</span>
             </div>
           );
         })}
@@ -52,29 +52,29 @@ export function TotalsSection() {
         {/* Category breakdowns */}
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Plant Material</span>
-          <span>{formatCurrency(plantTotal)}</span>
+          <span className="tabular-nums">{formatCurrency(plantTotal)}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Labor & Services</span>
-          <span>{formatCurrency(laborTotal)}</span>
+          <span className="tabular-nums">{formatCurrency(laborTotal)}</span>
         </div>
         {materialsTotal > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Other Materials</span>
-            <span>{formatCurrency(materialsTotal)}</span>
+            <span className="tabular-nums">{formatCurrency(materialsTotal)}</span>
           </div>
         )}
         {designFeeTotal > 0 && (
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Design Fee</span>
-            <span>{formatCurrency(designFeeTotal)}</span>
+            <span className="tabular-nums">{formatCurrency(designFeeTotal)}</span>
           </div>
         )}
 
         <div className="border-t border-border pt-2">
-          <div className="flex justify-between text-sm font-medium">
+          <div className="flex justify-between text-sm font-semibold text-forest">
             <span>Subtotal</span>
-            <span>{formatCurrency(subtotal)}</span>
+            <span className="tabular-nums">{formatCurrency(subtotal)}</span>
           </div>
         </div>
 
@@ -102,16 +102,16 @@ export function TotalsSection() {
               <span className="text-xs text-muted-foreground">%</span>
             </div>
           </div>
-          <span>{formatCurrency(tax)}</span>
+          <span className="tabular-nums">{formatCurrency(tax)}</span>
         </div>
 
         {/* Grand Total */}
-        <div className="border-t-2 border-forest pt-3">
+        <div className="border-t-2 border-sage pt-4 mt-1">
           <div className="flex justify-between items-center">
             <span className="text-lg font-heading font-bold text-forest">
               Grand Total
             </span>
-            <span className="text-xl font-heading font-bold text-forest">
+            <span className="text-2xl font-heading font-bold text-terracotta tabular-nums">
               {formatCurrency(grandTotal)}
             </span>
           </div>

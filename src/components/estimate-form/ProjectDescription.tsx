@@ -6,8 +6,8 @@ export function ProjectDescription() {
   const { estimate, dispatch } = useEstimate();
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
-      <h3 className="text-sm font-semibold text-forest uppercase tracking-wide mb-4">
+    <div className="rounded-lg border border-border bg-card p-6">
+      <h3 className="text-xs font-semibold text-sage uppercase tracking-widest mb-4">
         Project Description
       </h3>
       <div className="space-y-1.5">
@@ -20,8 +20,9 @@ export function ProjectDescription() {
           onChange={(e) =>
             dispatch({ type: "SET_PROJECT_DESCRIPTION", value: e.target.value })
           }
-          placeholder="Describe the scope of work..."
+          placeholder="Describe the scope of work, including site conditions, client goals, and design intent..."
           rows={4}
+          className="resize-y"
         />
       </div>
     </div>

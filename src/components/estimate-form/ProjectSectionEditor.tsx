@@ -68,12 +68,12 @@ export function ProjectSectionEditor({
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
       {/* Section Header */}
-      <div className="flex items-center gap-2 px-5 py-3 bg-sage/10 border-b border-border">
+      <div className="flex items-center gap-2 px-5 py-3.5 bg-sage/8 border-b border-sage/15">
         <Button
           variant="ghost"
           size="icon-xs"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="shrink-0"
+          className="shrink-0 text-sage-dark hover:bg-sage/15"
         >
           {isCollapsed ? (
             <ChevronDown className="size-4" />
@@ -96,9 +96,9 @@ export function ProjectSectionEditor({
                 }
               }}
               autoFocus
-              className="h-7 px-2 rounded border border-input bg-background text-sm font-heading font-bold text-forest outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+              className="h-7 px-2 rounded border border-sage/30 bg-background text-sm font-heading font-bold text-forest outline-none focus-visible:border-sage focus-visible:ring-sage/30 focus-visible:ring-[3px]"
             />
-            <Button variant="ghost" size="icon-xs" onClick={handleSaveName}>
+            <Button variant="ghost" size="icon-xs" onClick={handleSaveName} className="text-sage hover:bg-sage/15">
               <Check className="size-3.5" />
             </Button>
           </div>
@@ -111,15 +111,15 @@ export function ProjectSectionEditor({
             }}
             className="flex items-center gap-1.5 group cursor-pointer"
           >
-            <h3 className="text-base font-heading font-bold text-forest">
+            <h3 className="text-base font-heading font-bold text-forest tracking-wide">
               {section.name}
             </h3>
-            <Pencil className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Pencil className="size-3 text-stone opacity-0 group-hover:opacity-100 transition-opacity" />
           </button>
         )}
 
         <div className="ml-auto flex items-center gap-3">
-          <span className="text-sm font-medium text-muted-foreground">
+          <span className="text-sm font-semibold text-forest tabular-nums">
             {formatCurrency(sectionTotal)}
           </span>
           {canDelete && (
@@ -132,7 +132,7 @@ export function ProjectSectionEditor({
                   sectionId: section.id,
                 })
               }
-              className="text-muted-foreground hover:text-destructive"
+              className="text-stone hover:text-destructive hover:bg-destructive/10"
             >
               <Trash2 className="size-3.5" />
             </Button>
@@ -142,7 +142,7 @@ export function ProjectSectionEditor({
 
       {/* Section Body */}
       {!isCollapsed && (
-        <div className="px-5 py-4 space-y-6">
+        <div className="px-6 py-5 space-y-6">
           <LineItemSection
             title="Plant Material"
             items={section.plantMaterial}
@@ -154,7 +154,7 @@ export function ProjectSectionEditor({
             onRemove={(itemId) => handleRemoveItem("plantMaterial", itemId)}
           />
 
-          <div className="border-t border-border" />
+          <div className="border-t border-stone/15" />
 
           <LineItemSection
             title="Labor & Services"
@@ -169,7 +169,7 @@ export function ProjectSectionEditor({
             }
           />
 
-          <div className="border-t border-border" />
+          <div className="border-t border-stone/15" />
 
           <LineItemSection
             title="Other Materials"

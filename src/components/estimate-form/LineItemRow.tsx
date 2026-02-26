@@ -154,14 +154,14 @@ export function LineItemRow({
           className="w-full"
           step="0.01"
         />
-        <div className="text-sm text-right font-medium pr-1">
+        <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
           {formatCurrency(lineTotal)}
         </div>
         <Button
           variant="ghost"
           size="icon-xs"
           onClick={onRemove}
-          className="text-muted-foreground hover:text-destructive"
+          className="text-stone hover:text-destructive hover:bg-destructive/10"
         >
           <Trash2 className="size-3.5" />
         </Button>
@@ -196,14 +196,14 @@ export function LineItemRow({
           className="w-full"
           step="0.01"
         />
-        <div className="text-sm text-right font-medium pr-1">
+        <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
           {formatCurrency(lineTotal)}
         </div>
         <Button
           variant="ghost"
           size="icon-xs"
           onClick={onRemove}
-          className="text-muted-foreground hover:text-destructive"
+          className="text-stone hover:text-destructive hover:bg-destructive/10"
         >
           <Trash2 className="size-3.5" />
         </Button>
@@ -238,14 +238,14 @@ export function LineItemRow({
           className="w-full"
           step="0.01"
         />
-        <div className="text-sm text-right font-medium pr-1">
+        <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
           {formatCurrency(lineTotal)}
         </div>
         <Button
           variant="ghost"
           size="icon-xs"
           onClick={onRemove}
-          className="text-muted-foreground hover:text-destructive"
+          className="text-stone hover:text-destructive hover:bg-destructive/10"
         >
           <Trash2 className="size-3.5" />
         </Button>
@@ -280,14 +280,14 @@ export function LineItemRow({
         className="w-full"
         step="0.01"
       />
-      <div className="text-sm text-right font-medium pr-1">
+      <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
         {formatCurrency(lineTotal)}
       </div>
       <Button
         variant="ghost"
         size="icon-xs"
         onClick={onRemove}
-        className="text-muted-foreground hover:text-destructive"
+        className="text-stone hover:text-destructive hover:bg-destructive/10"
       >
         <Trash2 className="size-3.5" />
       </Button>

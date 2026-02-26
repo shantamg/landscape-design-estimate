@@ -14,10 +14,11 @@ interface LineItemSectionProps {
 }
 
 function getColumnHeaders(sectionType: SectionType) {
+  const baseClass = "text-[10px] text-stone font-semibold uppercase tracking-wider pb-2 border-b border-stone/20 mb-1";
   switch (sectionType) {
     case "plant":
       return (
-        <div className="grid grid-cols-[1fr_120px_60px_90px_90px_32px] gap-2 text-xs text-muted-foreground font-medium uppercase tracking-wide px-0 pb-1">
+        <div className={`grid grid-cols-[1fr_120px_60px_90px_90px_32px] gap-2 ${baseClass}`}>
           <span>Description</span>
           <span>Size</span>
           <span className="text-right">Qty</span>
@@ -28,7 +29,7 @@ function getColumnHeaders(sectionType: SectionType) {
       );
     case "labor":
       return (
-        <div className="grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 text-xs text-muted-foreground font-medium uppercase tracking-wide px-0 pb-1">
+        <div className={`grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 ${baseClass}`}>
           <span>Description</span>
           <span className="text-right">Qty</span>
           <span>Unit</span>
@@ -39,7 +40,7 @@ function getColumnHeaders(sectionType: SectionType) {
       );
     case "material":
       return (
-        <div className="grid grid-cols-[1fr_60px_80px_90px_90px_32px] gap-2 text-xs text-muted-foreground font-medium uppercase tracking-wide px-0 pb-1">
+        <div className={`grid grid-cols-[1fr_60px_80px_90px_90px_32px] gap-2 ${baseClass}`}>
           <span>Description</span>
           <span className="text-right">Qty</span>
           <span>Unit</span>
@@ -50,7 +51,7 @@ function getColumnHeaders(sectionType: SectionType) {
       );
     default:
       return (
-        <div className="grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 text-xs text-muted-foreground font-medium uppercase tracking-wide px-0 pb-1">
+        <div className={`grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 ${baseClass}`}>
           <span>Description</span>
           <span className="text-right">Qty</span>
           <span>Unit</span>
@@ -75,7 +76,7 @@ export function LineItemSection({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-forest">{title}</h4>
+        <h4 className="text-xs font-semibold text-sage uppercase tracking-widest">{title}</h4>
       </div>
 
       {items.length > 0 && getColumnHeaders(sectionType)}
@@ -94,18 +95,18 @@ export function LineItemSection({
         ))}
       </div>
 
-      <div className="flex items-center justify-between pt-1">
+      <div className="flex items-center justify-between pt-2">
         <Button
           variant="ghost"
           size="sm"
           onClick={onAdd}
-          className="text-sage hover:text-sage-dark -ml-2"
+          className="text-sage hover:text-sage-dark hover:bg-sage/10 -ml-2"
         >
           <Plus className="size-4" />
           Add {sectionType === "plant" ? "Plant" : sectionType === "labor" ? "Service" : sectionType === "material" ? "Material" : "Item"}
         </Button>
         {items.length > 0 && (
-          <div className="text-sm font-medium text-muted-foreground">
+          <div className="text-sm font-semibold text-forest tabular-nums">
             Subtotal: {formatCurrency(subtotal)}
           </div>
         )}

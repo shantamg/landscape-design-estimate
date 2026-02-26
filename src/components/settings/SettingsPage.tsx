@@ -3,7 +3,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { LogoUpload } from "./LogoUpload";
 import { loadSettings, saveSettings, exportAllData, importData, type ExportData } from "@/lib/storage";
 import type { Settings } from "@/types";
@@ -72,8 +71,8 @@ export function SettingsPage() {
   return (
     <div className="space-y-8 max-w-2xl">
       {/* Company Information */}
-      <section className="space-y-4">
-        <h3 className="text-lg font-heading font-semibold text-forest">
+      <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <h3 className="text-base font-heading font-bold text-forest tracking-wide">
           Company Information
         </h3>
 
@@ -161,11 +160,9 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <Separator />
-
       {/* Defaults */}
-      <section className="space-y-4">
-        <h3 className="text-lg font-heading font-semibold text-forest">
+      <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <h3 className="text-base font-heading font-bold text-forest tracking-wide">
           Estimate Defaults
         </h3>
 
@@ -212,11 +209,9 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <Separator />
-
       {/* Default Terms */}
-      <section className="space-y-4">
-        <h3 className="text-lg font-heading font-semibold text-forest">
+      <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <h3 className="text-base font-heading font-bold text-forest tracking-wide">
           Default Terms & Conditions
         </h3>
 
@@ -251,11 +246,9 @@ export function SettingsPage() {
         </div>
       </section>
 
-      <Separator />
-
       {/* Data Management */}
-      <section className="space-y-4">
-        <h3 className="text-lg font-heading font-semibold text-forest">
+      <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <h3 className="text-base font-heading font-bold text-forest tracking-wide">
           Data Management
         </h3>
 
@@ -286,7 +279,7 @@ export function SettingsPage() {
       </section>
 
       {/* Save Button */}
-      <div className="sticky bottom-0 py-4 bg-background/95 backdrop-blur border-t border-border -mx-6 px-6">
+      <div className="sticky bottom-0 py-4 bg-background/95 backdrop-blur-sm border-t-2 border-sage/20 -mx-6 px-6">
         <Button onClick={handleSave} className="bg-sage hover:bg-sage-dark">
           Save Settings
         </Button>

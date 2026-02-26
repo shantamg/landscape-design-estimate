@@ -67,13 +67,13 @@ export function EstimateList({
   );
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Input
-          placeholder="Search estimates..."
+          placeholder="Search by client name, address, or estimate number..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="max-w-sm"
+          className="max-w-md"
         />
         <Button
           onClick={onNewEstimate}
@@ -84,20 +84,25 @@ export function EstimateList({
       </div>
 
       {sorted.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-border p-12 text-center">
-          <p className="text-muted-foreground">
+        <div className="rounded-lg border-2 border-dashed border-sage/20 p-16 text-center">
+          <div className="w-12 h-12 rounded-full bg-sage/10 flex items-center justify-center mx-auto mb-4">
+            <span className="text-sage text-lg font-heading font-bold">NL</span>
+          </div>
+          <p className="text-muted-foreground mb-1">
             {searchQuery
               ? "No estimates match your search."
-              : "No saved estimates yet. Create your first estimate!"}
+              : "No saved estimates yet."}
           </p>
           {!searchQuery && (
-            <Button
-              onClick={onNewEstimate}
-              variant="outline"
-              className="mt-4"
-            >
-              Create your first estimate
-            </Button>
+            <>
+              <p className="text-sm text-stone mb-4">Get started by creating your first estimate.</p>
+              <Button
+                onClick={onNewEstimate}
+                className="bg-sage hover:bg-sage-dark"
+              >
+                Create First Estimate
+              </Button>
+            </>
           )}
         </div>
       ) : (

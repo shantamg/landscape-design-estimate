@@ -51,6 +51,7 @@
     --color-forest: #2D3B2D;
     --color-stone: #A89F91;
     --color-stone-light: #C4BAB0;
+    --color-stone-dark: #8A8274;
     --color-parchment: #F5F1EB;
     --color-terracotta: #C4745A;
     --color-terracotta-light: #D4917C;
@@ -101,9 +102,23 @@
     }
     body {
         @apply bg-background text-foreground font-body;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
     h1, h2, h3, h4, h5, h6 {
         @apply font-heading;
+    }
+    ::selection {
+        background-color: #6B7F5E30;
+    }
+    /* Improve number input spinner styling */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+        opacity: 0.5;
+    }
+    input[type="number"]:hover::-webkit-inner-spin-button,
+    input[type="number"]:hover::-webkit-outer-spin-button {
+        opacity: 1;
     }
 }
 
