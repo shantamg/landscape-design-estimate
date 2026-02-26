@@ -10,11 +10,7 @@ import { DesignFeeSection } from "./DesignFeeSection";
 import { TotalsSection } from "./TotalsSection";
 import { ActionBar } from "./ActionBar";
 
-interface EstimateFormProps {
-  onRevisionCreated?: (id: string) => void;
-}
-
-export function EstimateForm({ onRevisionCreated }: EstimateFormProps) {
+export function EstimateForm() {
   const { estimate, dispatch } = useEstimate();
 
   return (
@@ -54,7 +50,7 @@ export function EstimateForm({ onRevisionCreated }: EstimateFormProps) {
       <TotalsSection />
 
       {/* Action Bar */}
-      <ActionBar onRevisionCreated={onRevisionCreated} />
+      <ActionBar />
     </div>
   );
 }

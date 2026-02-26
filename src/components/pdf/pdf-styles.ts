@@ -34,7 +34,7 @@ export const styles = StyleSheet.create({
     paddingBottom: page.marginBottom,
     paddingLeft: page.marginLeft,
     paddingRight: page.marginRight,
-    backgroundColor: colors.parchment,
+    backgroundColor: colors.white,
     fontFamily: "Source Sans 3",
     fontSize: 10,
     color: colors.deepForest,

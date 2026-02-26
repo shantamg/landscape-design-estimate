@@ -1,18 +1,14 @@
 import { useState } from "react";
-import { Save, FileText, Printer, Copy, Download } from "lucide-react";
+import { Save, FileText, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEstimate } from "@/context/EstimateContext";
-import { saveEstimate, loadSettings, duplicateEstimate } from "@/lib/storage";
+import { saveEstimate, loadSettings } from "@/lib/storage";
 import { toast } from "sonner";
 import { pdf } from "@react-pdf/renderer";
 import { EstimatePDF } from "@/components/pdf/EstimatePDF";
 import { PDFPreviewModal } from "@/components/pdf/PDFPreviewModal";
 
-interface ActionBarProps {
-  onRevisionCreated?: (id: string) => void;
-}
-
-export function ActionBar({ onRevisionCreated }: ActionBarProps) {
+export function ActionBar() {
   const { estimate } = useEstimate();
   const [exporting, setExporting] = useState(false);
 
@@ -79,23 +75,6 @@ export function ActionBar({ onRevisionCreated }: ActionBarProps) {
     }
   }
 
-  function handleCreateRevision() {
-    // Save current first
-    try {
-      saveEstimate(estimate);
-    } catch {
-      toast.error("Failed to save before creating revision.");
-      return;
-    }
-    const dup = duplicateEstimate(estimate.id);
-    if (dup) {
-      toast.success(`Revision created: ${dup.estimateNumber}`);
-      onRevisionCreated?.(dup.id);
-    } else {
-      toast.error("Failed to create revision.");
-    }
-  }
-
   const settings = loadSettings();
 
   return (
@@ -122,23 +101,6 @@ export function ActionBar({ onRevisionCreated }: ActionBarProps) {
       >
         <Download className="size-4" />
         {exporting ? "Exporting..." : "Export PDF"}
-      </Button>
-      <div className="hidden sm:block w-px h-6 bg-border" />
-      <Button
-        variant="ghost"
-        onClick={() => window.print()}
-        className="gap-2 text-muted-foreground"
-      >
-        <Printer className="size-4" />
-        Print
-      </Button>
-      <Button
-        variant="ghost"
-        onClick={handleCreateRevision}
-        className="gap-2 text-muted-foreground"
-      >
-        <Copy className="size-4" />
-        Revision
       </Button>
     </div>
   );

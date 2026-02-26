@@ -95,15 +95,6 @@ function AppContent() {
     setActiveTab("contracts");
   }, []);
 
-  const handleRevisionCreated = useCallback((id: string) => {
-    const est = loadEstimate(id);
-    if (est) {
-      setCurrentEstimate(est);
-      setEstimateKey((k) => k + 1);
-      toast.info("Editing new revision.");
-    }
-  }, []);
-
   const handleDuplicate = useCallback((id: string) => {
     const dup = duplicateEstimate(id);
     if (dup) {
@@ -141,7 +132,7 @@ function AppContent() {
             </TabsList>
 
             <TabsContent value="new">
-              <EstimateForm onRevisionCreated={handleRevisionCreated} />
+              <EstimateForm />
             </TabsContent>
 
             <TabsContent value="saved">
