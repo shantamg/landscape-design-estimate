@@ -1,12 +1,9 @@
-import { Input } from "@/components/ui/input";
+import { useState } from "react";
+import { Trash2, ChevronDown, ChevronUp, Pencil, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { LineItemSection } from "./LineItemSection";
 import { useEstimate } from "@/context/EstimateContext";
-import {
-  formatCurrency,
-  computeProjectSectionSubtotal,
-} from "@/lib/estimate-utils";
+import { LineItemSection } from "./LineItemSection";
+import { formatCurrency, computeProjectSectionSubtotal } from "@/lib/estimate-utils";
 import type { ProjectSection, LineItem } from "@/types";
 
 interface ProjectSectionEditorProps {
@@ -19,9 +16,21 @@ export function ProjectSectionEditor({
   canDelete,
 }: ProjectSectionEditorProps) {
   const { dispatch } = useEstimate();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [editName, setEditName] = useState(section.name);
 
-  function handleUpdateName(name: string) {
-    dispatch({ type: "UPDATE_SECTION_NAME", sectionId: section.id, name });
+  const sectionTotal = computeProjectSectionSubtotal(section);
+
+  function handleSaveName() {
+    if (editName.trim()) {
+      dispatch({
+        type: "UPDATE_SECTION_NAME",
+        sectionId: section.id,
+        name: editName.trim(),
+      });
+    }
+    setIsEditingName(false);
   }
 
   function handleAddItem(
@@ -56,81 +65,124 @@ export function ProjectSectionEditor({
     });
   }
 
-  function handleDeleteSection() {
-    dispatch({ type: "REMOVE_PROJECT_SECTION", sectionId: section.id });
-  }
-
-  const sectionTotal = computeProjectSectionSubtotal(section);
-
   return (
-    <div className="rounded-lg border border-border bg-card p-4 space-y-4">
-      {/* Section header */}
-      <div className="flex items-center gap-3">
-        <Input
-          value={section.name}
-          onChange={(e) => handleUpdateName(e.target.value)}
-          className="text-lg font-heading font-semibold border-none shadow-none p-0 h-auto focus-visible:ring-0 bg-transparent"
-          placeholder="Section name (e.g., Backyard)"
-        />
-        <div className="ml-auto flex items-center gap-2">
-          <span className="text-sm font-medium tabular-nums whitespace-nowrap">
-            Section: {formatCurrency(sectionTotal)}
+    <div className="rounded-lg border border-border bg-card overflow-hidden">
+      {/* Section Header */}
+      <div className="flex items-center gap-2 px-5 py-3 bg-sage/10 border-b border-border">
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="shrink-0"
+        >
+          {isCollapsed ? (
+            <ChevronDown className="size-4" />
+          ) : (
+            <ChevronUp className="size-4" />
+          )}
+        </Button>
+
+        {isEditingName ? (
+          <div className="flex items-center gap-2 flex-1">
+            <input
+              type="text"
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleSaveName();
+                if (e.key === "Escape") {
+                  setEditName(section.name);
+                  setIsEditingName(false);
+                }
+              }}
+              autoFocus
+              className="h-7 px-2 rounded border border-input bg-background text-sm font-heading font-bold text-forest outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+            />
+            <Button variant="ghost" size="icon-xs" onClick={handleSaveName}>
+              <Check className="size-3.5" />
+            </Button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setEditName(section.name);
+              setIsEditingName(true);
+            }}
+            className="flex items-center gap-1.5 group cursor-pointer"
+          >
+            <h3 className="text-base font-heading font-bold text-forest">
+              {section.name}
+            </h3>
+            <Pencil className="size-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+          </button>
+        )}
+
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-sm font-medium text-muted-foreground">
+            {formatCurrency(sectionTotal)}
           </span>
           {canDelete && (
             <Button
-              type="button"
               variant="ghost"
-              size="sm"
-              onClick={handleDeleteSection}
-              className="text-destructive hover:text-destructive"
+              size="icon-xs"
+              onClick={() =>
+                dispatch({
+                  type: "REMOVE_PROJECT_SECTION",
+                  sectionId: section.id,
+                })
+              }
+              className="text-muted-foreground hover:text-destructive"
             >
-              Delete
+              <Trash2 className="size-3.5" />
             </Button>
           )}
         </div>
       </div>
 
-      <Separator />
+      {/* Section Body */}
+      {!isCollapsed && (
+        <div className="px-5 py-4 space-y-6">
+          <LineItemSection
+            title="Plant Material"
+            items={section.plantMaterial}
+            sectionType="plant"
+            onAdd={() => handleAddItem("plantMaterial")}
+            onUpdate={(itemId, updates) =>
+              handleUpdateItem("plantMaterial", itemId, updates)
+            }
+            onRemove={(itemId) => handleRemoveItem("plantMaterial", itemId)}
+          />
 
-      {/* Plant Material (FIRST per Nancy's spec) */}
-      <LineItemSection
-        title="Plant Material"
-        items={section.plantMaterial}
-        catalogType="plant"
-        onAdd={() => handleAddItem("plantMaterial")}
-        onUpdate={(itemId, updates) =>
-          handleUpdateItem("plantMaterial", itemId, updates)
-        }
-        onRemove={(itemId) => handleRemoveItem("plantMaterial", itemId)}
-      />
+          <div className="border-t border-border" />
 
-      <Separator className="my-2" />
+          <LineItemSection
+            title="Labor & Services"
+            items={section.laborAndServices}
+            sectionType="labor"
+            onAdd={() => handleAddItem("laborAndServices")}
+            onUpdate={(itemId, updates) =>
+              handleUpdateItem("laborAndServices", itemId, updates)
+            }
+            onRemove={(itemId) =>
+              handleRemoveItem("laborAndServices", itemId)
+            }
+          />
 
-      {/* Labor & Services (SECOND) */}
-      <LineItemSection
-        title="Labor & Services"
-        items={section.laborAndServices}
-        catalogType="service"
-        onAdd={() => handleAddItem("laborAndServices")}
-        onUpdate={(itemId, updates) =>
-          handleUpdateItem("laborAndServices", itemId, updates)
-        }
-        onRemove={(itemId) => handleRemoveItem("laborAndServices", itemId)}
-      />
+          <div className="border-t border-border" />
 
-      <Separator className="my-2" />
-
-      {/* Other Materials (THIRD) */}
-      <LineItemSection
-        title="Other Materials"
-        items={section.otherMaterials}
-        catalogType="material"
-        onAdd={() => handleAddItem("otherMaterials")}
-        onUpdate={(itemId, updates) =>
-          handleUpdateItem("otherMaterials", itemId, updates)
-        }
-        onRemove={(itemId) => handleRemoveItem("otherMaterials", itemId)}
-      />
+          <LineItemSection
+            title="Other Materials"
+            items={section.otherMaterials}
+            sectionType="material"
+            onAdd={() => handleAddItem("otherMaterials")}
+            onUpdate={(itemId, updates) =>
+              handleUpdateItem("otherMaterials", itemId, updates)
+            }
+            onRemove={(itemId) => handleRemoveItem("otherMaterials", itemId)}
+          />
+        </div>
+      )}
     </div>
   );
 }
