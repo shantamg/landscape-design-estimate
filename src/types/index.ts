@@ -41,6 +41,7 @@ export interface LineItem {
   unit: UnitType | string;
   unitPrice: number;
   total: number; // Computed: quantity * unitPrice
+  noPrice?: boolean; // Description-only line (no individual price)
 }
 
 // --- Project Section ---

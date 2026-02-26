@@ -228,6 +228,97 @@ export function initializeCatalog(defaultCatalog: CatalogItem[]): void {
   if (loadCatalog("material").length === 0) saveCatalog("material", materials);
 }
 
+// --- Single Estimate Import (from JSON) ---
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function importSingleEstimate(data: any): Estimate {
+  const settings = loadSettings();
+  const now = new Date().toISOString();
+
+  const estimateNumber = generateEstimateNumber(
+    settings.estimateNumberPrefix,
+    settings.nextEstimateNumber
+  );
+
+  // Regenerate IDs for line items
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function regenLineItems(items: any[] | undefined): import("@/types").LineItem[] {
+    if (!Array.isArray(items)) return [];
+    return items.map((item) => ({
+      id: crypto.randomUUID(),
+      category: item.category ?? "Other",
+      description: item.description ?? "",
+      quantity: Number(item.quantity) || 0,
+      unit: item.unit ?? "ea",
+      unitPrice: Number(item.unitPrice) || 0,
+      total: (Number(item.quantity) || 0) * (Number(item.unitPrice) || 0),
+      ...(item.noPrice ? { noPrice: true } : {}),
+    }));
+  }
+
+  // Regenerate IDs for project sections
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function regenSections(sections: any[] | undefined): import("@/types").ProjectSection[] {
+    if (!Array.isArray(sections)) return [];
+    return sections.map((s) => ({
+      id: crypto.randomUUID(),
+      name: s.name ?? "Project",
+      plantMaterial: regenLineItems(s.plantMaterial),
+      laborAndServices: regenLineItems(s.laborAndServices),
+      otherMaterials: regenLineItems(s.otherMaterials),
+    }));
+  }
+
+  const client = data.client ?? {};
+
+  const estimate: Estimate = {
+    id: crypto.randomUUID(),
+    estimateNumber,
+    status: "draft",
+    createdAt: now,
+    updatedAt: now,
+    validDays: data.validDays ?? settings.defaults.validDays,
+
+    client: {
+      name: client.name ?? "",
+      address: client.address ?? "",
+      city: client.city ?? "",
+      state: client.state ?? "",
+      zip: client.zip ?? "",
+      phone: client.phone ?? "",
+      email: client.email ?? "",
+      projectAddress: client.projectAddress ?? "",
+      projectAddressSameAsClient: client.projectAddressSameAsClient ?? true,
+    },
+
+    projectDescription: data.projectDescription ?? "",
+    estimatedStartDate: data.estimatedStartDate ?? "",
+    estimatedDuration: data.estimatedDuration ?? "",
+
+    projectSections: regenSections(data.projectSections),
+    designFee: regenLineItems(data.designFee),
+
+    taxRate: data.taxRate ?? settings.defaults.taxRate,
+    taxableCategories: data.taxableCategories ?? ["Planting", "Other"],
+    paymentSchedule: data.paymentSchedule ?? {
+      template: settings.defaults.paymentTemplate,
+      milestones: [],
+    },
+
+    terms: data.terms ?? settings.defaults.terms,
+    warranty: data.warranty ?? settings.defaults.warranty,
+    exclusions: data.exclusions ?? settings.defaults.exclusions,
+    notes: data.notes ?? "",
+  };
+
+  // Increment estimate number
+  settings.nextEstimateNumber++;
+  saveSettings(settings);
+
+  saveEstimate(estimate);
+  return estimate;
+}
+
 // --- Export / Import ---
 
 export interface ExportData {

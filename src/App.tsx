@@ -8,6 +8,9 @@ import {
   incrementEstimateNumber,
   loadEstimate,
   duplicateEstimate,
+  listEstimates,
+  listContracts,
+  loadCatalog,
 } from "@/lib/storage";
 import {
   EstimateProvider,
@@ -23,11 +26,14 @@ import { AuthStatus } from "@/components/auth/AuthStatus";
 import { LoginPage } from "@/components/auth/LoginPage";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { pushAllToCloud, getSyncStatus, onSyncStatusChange } from "@/lib/sync";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { Cloud, CloudOff, Loader2, CheckCircle2 } from "lucide-react";
 
 function App() {
-  const { isConfigured, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  if (isConfigured && !isAuthenticated) {
+  if (!isAuthenticated) {
     return <LoginPage />;
   }
 
@@ -42,6 +48,30 @@ function AppContent() {
   const [estimateKey, setEstimateKey] = useState(0);
   // Pre-selected estimate ID for contract creation
   const [contractEstimateId, setContractEstimateId] = useState<string>("");
+  const [syncStatus, setSyncStatus] = useState(getSyncStatus());
+
+  // Push all local data to cloud on mount (user just authenticated)
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+
+    pushAllToCloud({
+      estimates: listEstimates(),
+      contracts: listContracts(),
+      settings: loadSettings(),
+      catalogs: {
+        plant: loadCatalog("plant"),
+        service: loadCatalog("service"),
+        material: loadCatalog("material"),
+      },
+    });
+  }, []);
+
+  // Track sync status for header indicator
+  useEffect(() => {
+    if (!isSupabaseConfigured()) return;
+    const unsubscribe = onSyncStatusChange(setSyncStatus);
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     // Initialize catalog and settings on first load
@@ -118,7 +148,17 @@ function AppContent() {
                 <p className="text-xs text-stone tracking-wider uppercase">Estimate Builder</p>
               </div>
             </div>
-            <AuthStatus />
+            <div className="flex items-center gap-2">
+              {isSupabaseConfigured() && (
+                <span className="text-stone" title={`Sync: ${syncStatus}`}>
+                  {syncStatus === "syncing" && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {syncStatus === "synced" && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                  {syncStatus === "error" && <CloudOff className="h-4 w-4 text-red-500" />}
+                  {syncStatus === "idle" && <Cloud className="h-4 w-4 opacity-40" />}
+                </span>
+              )}
+              <AuthStatus />
+            </div>
           </div>
         </header>
 

@@ -1,0 +1,48 @@
+{
+  "client": {
+    "name": "",
+    "address": "4267 Avenue Del Mar",
+    "city": "Carpinteria",
+    "state": "CA",
+    "zip": ""
+  },
+  "projectDescription": "Landscape design and installation — 4267 Avenue Del Mar, Carpinteria. Two areas: Area 1 (Beach front, Side of house, Beach front deck) and Area 2 (Entrance, Guest house front, Driveway, Tennis court, House deck). Original estimate dated 2/24/25.",
+  "projectSections": [
+    {
+      "name": "Area 1",
+      "plantMaterial": [
+        { "description": "Beach front — 125 15gal plants, 250 5gal plants, 20 flats groundcover", "quantity": 1, "unit": "lot", "unitPrice": 22900, "category": "Planting" },
+        { "description": "Side of house — 2 24\" box trees, 12 15gal plants, 65 5gal plants", "quantity": 1, "unit": "lot", "unitPrice": 0, "category": "Planting", "noPrice": true },
+        { "description": "Beach front deck — 3 24\" box trees for containers, 60 1gal plants", "quantity": 1, "unit": "lot", "unitPrice": 6175, "category": "Planting" }
+      ],
+      "laborAndServices": [
+        { "description": "Demo, hauling, grading; Planting labor incl. organic planting soil; Irrigation materials and labor; Fertilize all plants", "quantity": 1, "unit": "lot", "unitPrice": 28650, "category": "Labor" },
+        { "description": "Meetings and installation supervision — billed at $175/hr", "quantity": 0, "unit": "hr", "unitPrice": 175, "category": "Labor", "noPrice": true }
+      ],
+      "otherMaterials": []
+    },
+    {
+      "name": "Area 2",
+      "plantMaterial": [
+        { "description": "Entrance / Left of driveway — 1 36\" box tree, 3 24\" box trees, 73 15gal, 85 5gal, 250 1gal", "quantity": 1, "unit": "lot", "unitPrice": 0, "category": "Planting", "noPrice": true },
+        { "description": "Front of guest house facing street — 42 15gal plants, 50 5gal plants", "quantity": 1, "unit": "lot", "unitPrice": 0, "category": "Planting", "noPrice": true },
+        { "description": "Along driveway — 30 5gal plants", "quantity": 1, "unit": "lot", "unitPrice": 0, "category": "Planting", "noPrice": true },
+        { "description": "Tennis court area — Remove existing hedge & compost bins; 1 36\" box tree in planter, 3 24\" box citrus, 30 5gal plants", "quantity": 1, "unit": "lot", "unitPrice": 0, "category": "Planting", "noPrice": true },
+        { "description": "Tennis court fence facing house — 7 24\" box camellia espalier, 20 5gal plants", "quantity": 1, "unit": "lot", "unitPrice": 0, "category": "Planting", "noPrice": true },
+        { "description": "House deck — 55 5gal plants, 18 15gal plants", "quantity": 1, "unit": "lot", "unitPrice": 0, "category": "Planting", "noPrice": true },
+        { "description": "All plant material — Area 2", "quantity": 1, "unit": "lot", "unitPrice": 37000, "category": "Planting" }
+      ],
+      "laborAndServices": [
+        { "description": "Remove existing plant material, grading, hauling; Planting labor incl. organic planting soil; Irrigation materials and labor; Fertilize all plants", "quantity": 1, "unit": "lot", "unitPrice": 34465, "category": "Labor" },
+        { "description": "* If new irrigation valves needed, price increases $800", "quantity": 0, "unit": "lot", "unitPrice": 0, "category": "Labor", "noPrice": true },
+        { "description": "Drawings — billed at $75/hr", "quantity": 0, "unit": "hr", "unitPrice": 75, "category": "Labor", "noPrice": true }
+      ],
+      "otherMaterials": []
+    }
+  ],
+  "designFee": [
+    { "description": "Design Fee — Area 1", "quantity": 1, "unit": "lot", "unitPrice": 18000, "category": "Other" },
+    { "description": "Design Fee — Area 2", "quantity": 1, "unit": "lot", "unitPrice": 15000, "category": "Other" }
+  ],
+  "notes": "Original property total estimate: $168,568.00. Side of house plant costs appear included in Beach front subtotal. Meetings/installation supervision billed at $175/hr, Drawings billed at $75/hr — hours as needed."
+}

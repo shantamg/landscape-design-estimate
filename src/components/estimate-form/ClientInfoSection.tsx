@@ -64,25 +64,6 @@ export function ClientInfoSection() {
             />
           </div>
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="client-phone">Phone</Label>
-          <Input
-            id="client-phone"
-            value={client.phone}
-            onChange={(e) => update("phone", e.target.value)}
-            placeholder="(310) 555-0000"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="client-email">Email</Label>
-          <Input
-            id="client-email"
-            type="email"
-            value={client.email}
-            onChange={(e) => update("email", e.target.value)}
-            placeholder="email@example.com"
-          />
-        </div>
       </div>
     </div>
   );

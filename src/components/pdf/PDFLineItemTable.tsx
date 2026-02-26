@@ -27,8 +27,8 @@ function getColumns(sectionType: SectionType): ColumnDef[] {
     case "laborAndServices":
       return [
         { label: "DESCRIPTION", width: "68%", align: "left", render: (i) => i.description },
-        { label: "DETAILS", width: "16%", align: "center", render: (i) => (i.unitPrice > 0 ? i.unit : "") },
-        { label: "TOTAL", width: "16%", align: "right", render: (i) => (i.quantity * i.unitPrice > 0 ? formatCurrency(i.quantity * i.unitPrice) : "Included") },
+        { label: "DETAILS", width: "16%", align: "center", render: (i) => (i.noPrice ? "" : i.unit) },
+        { label: "TOTAL", width: "16%", align: "right", render: (i) => (i.noPrice ? "" : formatCurrency(i.quantity * i.unitPrice)) },
       ];
     case "otherMaterials":
       return [
@@ -66,9 +66,9 @@ export function PDFLineItemTable({
   const subtotal = computeSectionSubtotal(items);
 
   return (
-    <View wrap={false} style={{ marginBottom: 4 }}>
-      {/* Category header */}
-      <View style={styles.categoryHeaderRow} minPresenceAhead={60}>
+    <View style={{ marginBottom: 4 }}>
+      {/* Category header — keep header + column headers + at least 1 row together */}
+      <View style={styles.categoryHeaderRow} minPresenceAhead={80}>
         <Text style={styles.categoryHeaderText}>{title.toUpperCase()}</Text>
       </View>
 
@@ -149,8 +149,8 @@ export function PDFProjectSection({
 
   return (
     <View style={{ marginBottom: 6 }}>
-      {/* Section name header — minPresenceAhead keeps it with content below */}
-      <Text style={styles.sectionHeader} minPresenceAhead={80}>{sectionName}</Text>
+      {/* Section name header — keep with at least the first category header + a few rows */}
+      <Text style={styles.sectionHeader} minPresenceAhead={120}>{sectionName}</Text>
 
       {/* Category tables in specified order: Plant, Labor, Materials */}
       <PDFLineItemTable
@@ -183,7 +183,7 @@ export function PDFDesignFeeSection({ items }: PDFDesignFeeSectionProps) {
 
   return (
     <View style={{ marginBottom: 6 }}>
-      <Text style={styles.sectionHeader} minPresenceAhead={80}>Design Fee</Text>
+      <Text style={styles.sectionHeader} minPresenceAhead={120}>Design Fee</Text>
       <PDFLineItemTable
         title="Design Fee"
         items={items}

@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LineItemAutocomplete } from "./LineItemAutocomplete";
 import { formatCurrency } from "@/lib/estimate-utils";
@@ -18,18 +18,13 @@ interface LineItemRowProps {
 
 const PLANT_SIZES = [
   '4" pot',
-  '6" pot',
-  "#1 (1 gal)",
-  "#2",
-  "#3",
-  "#5",
-  "#7",
-  "#10",
-  "#15",
-  "#25",
+  "1 gal",
+  "5 gal",
+  "7 gal",
+  "15 gal",
   '24" box',
   '36" box',
-  "Flat",
+  "Flats",
 ];
 
 const LABOR_UNITS = ["ea", "hr", "lot"];
@@ -47,24 +42,38 @@ function NumberInput({
   value,
   onChange,
   className = "",
-  min = 0,
-  step,
+  isCurrency = false,
 }: {
   value: number;
   onChange: (v: number) => void;
   className?: string;
   min?: number;
   step?: string;
+  isCurrency?: boolean;
 }) {
+  const inputClass = `h-8 rounded border border-input bg-transparent py-1 text-sm text-right outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow] ${isCurrency ? "pl-5 pr-2" : "px-2"} ${className}`;
+
+  function sanitize(raw: string): number {
+    // Strip $, commas, spaces, and any other non-numeric chars except . and -
+    const cleaned = raw.replace(/[^0-9.\-]/g, "");
+    return parseFloat(cleaned) || 0;
+  }
+
   return (
-    <input
-      type="number"
-      value={value || ""}
-      onChange={(e) => onChange(parseFloat(e.target.value) || 0)}
-      min={min}
-      step={step}
-      className={`h-8 rounded border border-input bg-transparent px-2 py-1 text-sm text-right outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow] ${className}`}
-    />
+    <div className={isCurrency ? "relative" : undefined}>
+      {isCurrency && (
+        <span className="absolute left-1.5 top-1/2 -translate-y-1/2 text-sm text-muted-foreground pointer-events-none">
+          $
+        </span>
+      )}
+      <input
+        type="text"
+        inputMode="decimal"
+        value={value || ""}
+        onChange={(e) => onChange(sanitize(e.target.value))}
+        className={inputClass}
+      />
+    </div>
   );
 }
 
@@ -140,7 +149,6 @@ export function LineItemRow({
               {size}
             </option>
           ))}
-          <option value="ea">ea</option>
         </select>
         <NumberInput
           value={item.quantity}
@@ -152,7 +160,7 @@ export function LineItemRow({
           value={item.unitPrice}
           onChange={(v) => onUpdate({ unitPrice: v })}
           className="w-full"
-          step="0.01"
+          isCurrency
         />
         <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
           {formatCurrency(lineTotal)}
@@ -171,7 +179,7 @@ export function LineItemRow({
 
   if (sectionType === "labor") {
     return (
-      <div className="grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 items-center" onKeyDown={handleKeyDown}>
+      <div className="grid grid-cols-[1fr_60px_70px_90px_90px_56px] gap-2 items-center" onKeyDown={handleKeyDown}>
         <LineItemAutocomplete
           value={item.description}
           onChange={(v) => onUpdate({ description: v })}
@@ -190,23 +198,44 @@ export function LineItemRow({
           options={LABOR_UNITS}
           onChange={(v) => onUpdate({ unit: v })}
         />
-        <NumberInput
-          value={item.unitPrice}
-          onChange={(v) => onUpdate({ unitPrice: v })}
-          className="w-full"
-          step="0.01"
-        />
-        <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
-          {formatCurrency(lineTotal)}
+        {item.noPrice ? (
+          <>
+            <div className="col-span-2 text-[10px] text-stone italic text-right pr-1">
+              no price
+            </div>
+          </>
+        ) : (
+          <>
+            <NumberInput
+              value={item.unitPrice}
+              onChange={(v) => onUpdate({ unitPrice: v })}
+              className="w-full"
+              isCurrency
+            />
+            <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
+              {formatCurrency(lineTotal)}
+            </div>
+          </>
+        )}
+        <div className="flex items-center gap-0.5">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => onUpdate({ noPrice: !item.noPrice, unitPrice: item.noPrice ? item.unitPrice : 0 })}
+            className={item.noPrice ? "text-sage hover:text-sage-dark hover:bg-sage/10" : "text-stone hover:text-sage hover:bg-sage/10"}
+            title={item.noPrice ? "Add price to this line" : "Remove price (description only)"}
+          >
+            <DollarSign className="size-3.5" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={onRemove}
+            className="text-stone hover:text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="size-3.5" />
+          </Button>
         </div>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={onRemove}
-          className="text-stone hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="size-3.5" />
-        </Button>
       </div>
     );
   }
@@ -236,7 +265,7 @@ export function LineItemRow({
           value={item.unitPrice}
           onChange={(v) => onUpdate({ unitPrice: v })}
           className="w-full"
-          step="0.01"
+          isCurrency
         />
         <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
           {formatCurrency(lineTotal)}
@@ -278,7 +307,7 @@ export function LineItemRow({
         value={item.unitPrice || (sectionType === "designFee" || sectionType === "supervision" ? 195 : 0)}
         onChange={(v) => onUpdate({ unitPrice: v })}
         className="w-full"
-        step="0.01"
+        isCurrency
       />
       <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
         {formatCurrency(lineTotal)}

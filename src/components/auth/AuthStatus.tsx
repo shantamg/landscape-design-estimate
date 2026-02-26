@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 
 export function AuthStatus() {
-  const { isConfigured, isAuthenticated, logout } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
-  if (!isConfigured || !isAuthenticated) return null;
+  if (!isAuthenticated) return null;
 
   return (
     <Button

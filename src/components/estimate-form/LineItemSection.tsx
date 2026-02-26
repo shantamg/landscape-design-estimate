@@ -29,7 +29,7 @@ function getColumnHeaders(sectionType: SectionType) {
       );
     case "labor":
       return (
-        <div className={`grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 ${baseClass}`}>
+        <div className={`grid grid-cols-[1fr_60px_70px_90px_90px_56px] gap-2 ${baseClass}`}>
           <span>Description</span>
           <span className="text-right">Qty</span>
           <span>Unit</span>

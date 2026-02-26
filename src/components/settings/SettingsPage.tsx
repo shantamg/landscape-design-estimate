@@ -149,14 +149,6 @@ export function SettingsPage() {
               onChange={(e) => updateCompany("website", e.target.value)}
             />
           </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="cslb">CSLB License #</Label>
-            <Input
-              id="cslb"
-              value={settings.company.licenseNumber}
-              onChange={(e) => updateCompany("licenseNumber", e.target.value)}
-            />
-          </div>
         </div>
       </section>
 

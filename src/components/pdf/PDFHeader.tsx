@@ -26,11 +26,6 @@ export function PDFHeader({ company, isFirstPage }: PDFHeaderProps) {
         <Text style={styles.headerContactLine}>
           {[company.phone, company.email].filter(Boolean).join("  |  ")}
         </Text>
-        {company.licenseNumber && (
-          <Text style={styles.headerContactLine}>
-            CSLB #{company.licenseNumber}
-          </Text>
-        )}
       </View>
     </View>
   );

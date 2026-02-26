@@ -1,10 +1,25 @@
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "./supabase";
 
+const ALLOWED_EMAILS = [
+  "nlgardendesign@earthlink.net",
+  "nancylyonsdesign@gmail.com",
+  "jason@galuten.com",
+];
+
+export function isEmailAllowed(email: string): boolean {
+  return ALLOWED_EMAILS.includes(email.toLowerCase().trim());
+}
+
 export async function signInWithMagicLink(email: string): Promise<{ error: string | null }> {
   if (!supabase) return { error: "Supabase not configured" };
 
-  const { error } = await supabase.auth.signInWithOtp({ email });
+  const normalized = email.toLowerCase().trim();
+  if (!isEmailAllowed(normalized)) {
+    return { error: "This email is not authorized for cloud sync" };
+  }
+
+  const { error } = await supabase.auth.signInWithOtp({ email: normalized });
   return { error: error?.message ?? null };
 }
 

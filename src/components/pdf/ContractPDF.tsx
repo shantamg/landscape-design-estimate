@@ -379,7 +379,7 @@ export function ContractPDF({
         </View>
 
         {/* Payment Schedule */}
-        <View style={s.sectionHeaderContainer}>
+        <View style={s.sectionHeaderContainer} minPresenceAhead={100}>
           <Text style={s.sectionHeaderText}>PAYMENT SCHEDULE</Text>
           <View style={s.sectionLeaderDots} />
         </View>
@@ -393,21 +393,21 @@ export function ContractPDF({
         </Text>
 
         {/* Terms & Conditions */}
-        <View style={s.sectionHeaderContainer}>
+        <View style={s.sectionHeaderContainer} minPresenceAhead={100}>
           <Text style={s.sectionHeaderText}>TERMS & CONDITIONS</Text>
           <View style={s.sectionLeaderDots} />
         </View>
         {renderFormattedText(contract.terms.split("\nPayment Schedule\n")[0])}
 
         {/* Warranty */}
-        <View style={s.sectionHeaderContainer} wrap={false}>
+        <View style={s.sectionHeaderContainer} minPresenceAhead={100}>
           <Text style={s.sectionHeaderText}>WARRANTY</Text>
           <View style={s.sectionLeaderDots} />
         </View>
         {renderFormattedText(contract.warranty)}
 
         {/* Exclusions */}
-        <View style={s.sectionHeaderContainer} wrap={false}>
+        <View style={s.sectionHeaderContainer} minPresenceAhead={100}>
           <Text style={s.sectionHeaderText}>EXCLUSIONS</Text>
           <View style={s.sectionLeaderDots} />
         </View>
@@ -418,7 +418,7 @@ export function ContractPDF({
         {/* Change Orders */}
         {changeOrders && (
           <>
-            <View style={s.sectionHeaderContainer} wrap={false}>
+            <View style={s.sectionHeaderContainer} minPresenceAhead={100}>
               <Text style={s.sectionHeaderText}>CHANGE ORDERS</Text>
               <View style={s.sectionLeaderDots} />
             </View>
@@ -445,7 +445,7 @@ export function ContractPDF({
           {/* Column headers */}
           <View style={s.signatureRow}>
             <View style={s.signatureBlock}>
-              <Text style={s.signatureLabel}>Client</Text>
+              <Text style={s.companySignatureName}>{contract.client.name || "Client"}</Text>
             </View>
             <View style={s.signatureBlock}>
               <Text style={s.companySignatureName}>{company.name}</Text>
@@ -464,25 +464,16 @@ export function ContractPDF({
             </View>
           </View>
 
-          {/* Row 2: Printed Name / Date */}
-          <View style={s.signatureRow}>
-            <View style={s.signatureBlock}>
-              <Text style={s.signatureLabel}>Printed Name</Text>
-              <View style={{ ...s.signatureLine, width: "100%", height: 20 }} />
-            </View>
-            <View style={s.signatureBlock}>
-              <Text style={s.signatureLabel}>Date</Text>
-              <View style={{ ...s.signatureLine, width: "60%", height: 20 }} />
-            </View>
-          </View>
-
-          {/* Row 3: Date */}
+          {/* Row 2: Date */}
           <View style={s.signatureRow}>
             <View style={s.signatureBlock}>
               <Text style={s.signatureLabel}>Date</Text>
               <View style={{ ...s.signatureLine, width: "60%", height: 20 }} />
             </View>
-            <View style={s.signatureBlock} />
+            <View style={s.signatureBlock}>
+              <Text style={s.signatureLabel}>Date</Text>
+              <View style={{ ...s.signatureLine, width: "60%", height: 20 }} />
+            </View>
           </View>
         </View>
 
@@ -490,7 +481,6 @@ export function ContractPDF({
         <View style={s.footer} fixed>
           <Text style={s.footerText}>
             {company.name}
-            {company.licenseNumber ? `  |  CSLB #${company.licenseNumber}` : ""}
           </Text>
           <Text
             style={s.footerText}

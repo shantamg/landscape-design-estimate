@@ -1,31 +1,39 @@
 import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
+import { signInWithMagicLink, isEmailAllowed } from "@/lib/auth";
 
 export function LoginPage() {
-  const { login } = useAuth();
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(false);
-  const [checking, setChecking] = useState(false);
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [sending, setSending] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!password) return;
+    setError("");
+    setSuccessMessage("");
 
-    setChecking(true);
-    setError(false);
+    if (!email.trim()) {
+      setError("Please enter your email address");
+      return;
+    }
 
-    // Small delay so the spinner is visible
-    setTimeout(() => {
-      const success = login(password);
-      if (!success) {
-        setError(true);
-        setPassword("");
-      }
-      setChecking(false);
-    }, 300);
+    if (!isEmailAllowed(email)) {
+      setError("This email is not authorized");
+      return;
+    }
+
+    setSending(true);
+    const result = await signInWithMagicLink(email);
+    setSending(false);
+
+    if (result.error) {
+      setError(result.error);
+    } else {
+      setSuccessMessage("Check your email for a sign-in link");
+    }
   }
 
   return (
@@ -48,25 +56,32 @@ export function LoginPage() {
         <div className="rounded-lg border border-border bg-card p-6 space-y-5">
           <form onSubmit={handleSubmit} className="space-y-3">
             <Input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(false); }}
+              type="email"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError("");
+                setSuccessMessage("");
+              }}
               autoFocus
             />
             <Button
               type="submit"
-              disabled={checking}
+              disabled={sending}
               className="w-full bg-sage hover:bg-sage-dark"
             >
-              {checking ? (
+              {sending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
                 "Sign In"
               )}
             </Button>
             {error && (
-              <p className="text-sm text-red-500 text-center">Incorrect password</p>
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
+            {successMessage && (
+              <p className="text-sm text-green-600 text-center">{successMessage}</p>
             )}
           </form>
         </div>

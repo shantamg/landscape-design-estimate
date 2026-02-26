@@ -40,12 +40,6 @@ export function PDFClientInfo({
             {client.zip ? ` ${client.zip}` : ""}
           </Text>
         )}
-        {client.phone && (
-          <Text style={styles.clientDetail}>{client.phone}</Text>
-        )}
-        {client.email && (
-          <Text style={styles.clientDetail}>{client.email}</Text>
-        )}
         {projectAddr && (
           <View style={{ marginTop: 6 }}>
             <Text style={styles.clientLabel}>PROJECT ADDRESS</Text>
