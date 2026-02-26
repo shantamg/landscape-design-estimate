@@ -5,8 +5,11 @@ import { EstimateCard } from "./EstimateCard";
 import {
   listEstimates,
   deleteEstimate,
+  saveEstimate,
+  loadEstimate,
 } from "@/lib/storage";
 import type { Estimate } from "@/types";
+import { sampleEstimate } from "@/data/sample-estimate";
 import { toast } from "sonner";
 
 interface EstimateListProps {
@@ -50,6 +53,18 @@ export function EstimateList({
     onCreateContract?.(id);
   }
 
+  function handleLoadSample() {
+    const existing = loadEstimate(sampleEstimate.id);
+    if (existing) {
+      toast.info("Sample estimate already loaded.");
+      return;
+    }
+    const now = new Date().toISOString();
+    saveEstimate({ ...sampleEstimate, createdAt: now, updatedAt: now });
+    refreshList();
+    toast.success("Sample estimate loaded — 200 S. Bentley Ave");
+  }
+
   // Filter by search
   const filtered = estimates.filter((est) => {
     if (!searchQuery) return true;
@@ -75,12 +90,21 @@ export function EstimateList({
           onChange={(e) => setSearchQuery(e.target.value)}
           className="max-w-md"
         />
-        <Button
-          onClick={onNewEstimate}
-          className="ml-auto bg-sage hover:bg-sage-dark"
-        >
-          + New Estimate
-        </Button>
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={handleLoadSample}
+            className="text-stone hover:text-forest"
+          >
+            Load Sample Estimate
+          </Button>
+          <Button
+            onClick={onNewEstimate}
+            className="bg-sage hover:bg-sage-dark"
+          >
+            + New Estimate
+          </Button>
+        </div>
       </div>
 
       {sorted.length === 0 ? (

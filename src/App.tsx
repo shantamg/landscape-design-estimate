@@ -19,6 +19,7 @@ import { SettingsPage } from "@/components/settings/SettingsPage";
 import type { CatalogItem, Estimate } from "@/types";
 import defaultCatalog from "@/data/default-catalog.json";
 import { ContractForm } from "@/components/contract/ContractForm";
+import { AuthStatus } from "@/components/auth/AuthStatus";
 import { toast } from "sonner";
 
 function App() {
@@ -112,6 +113,7 @@ function App() {
                 <p className="text-xs text-stone tracking-wider uppercase">Estimate Builder</p>
               </div>
             </div>
+            <AuthStatus />
           </div>
         </header>
 

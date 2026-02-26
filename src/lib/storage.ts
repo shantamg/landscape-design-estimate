@@ -1,5 +1,14 @@
 import type { Estimate, Settings, CatalogItem, Contract } from "@/types";
 import { generateEstimateNumber } from "./estimate-utils";
+import {
+  queueSync,
+  syncEstimates,
+  syncContracts,
+  syncSettings,
+  syncCatalog,
+  deleteEstimateFromCloud,
+  deleteContractFromCloud,
+} from "./sync";
 
 // --- Storage Keys ---
 const KEYS = {
@@ -14,7 +23,7 @@ const KEYS = {
 // --- Default Settings ---
 const DEFAULT_SETTINGS: Settings = {
   company: {
-    name: "Nancy Lyons Garden Designs",
+    name: "Nancy Lyons Garden Design",
     address: "",
     city: "Los Angeles",
     state: "CA",
@@ -80,11 +89,13 @@ export function saveEstimate(estimate: Estimate): void {
   }
 
   setItem(KEYS.estimates, estimates);
+  queueSync("estimates", () => syncEstimates(listEstimates()));
 }
 
 export function deleteEstimate(id: string): void {
   const estimates = listEstimates().filter((e) => e.id !== id);
   setItem(KEYS.estimates, estimates);
+  queueSync(`delete-estimate-${id}`, () => deleteEstimateFromCloud(id));
 }
 
 export function duplicateEstimate(id: string): Estimate | null {
@@ -128,6 +139,7 @@ export function loadSettings(): Settings {
 
 export function saveSettings(settings: Settings): void {
   setItem(KEYS.settings, settings);
+  queueSync("settings", () => syncSettings(loadSettings()));
 }
 
 // --- Estimate Number ---
@@ -170,11 +182,13 @@ export function saveContract(contract: Contract): void {
   }
 
   setItem(KEYS.contracts, contracts);
+  queueSync("contracts", () => syncContracts(listContracts()));
 }
 
 export function deleteContract(id: string): void {
   const contracts = listContracts().filter((c) => c.id !== id);
   setItem(KEYS.contracts, contracts);
+  queueSync(`delete-contract-${id}`, () => deleteContractFromCloud(id));
 }
 
 // --- Catalog ---
@@ -198,6 +212,7 @@ export function saveCatalog(
     material: KEYS.materialCatalog,
   };
   setItem(keyMap[type], items);
+  queueSync(`catalog-${type}`, () => syncCatalog(type, loadCatalog(type)));
 }
 
 export function initializeCatalog(defaultCatalog: CatalogItem[]): void {
