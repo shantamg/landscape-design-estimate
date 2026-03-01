@@ -15,6 +15,7 @@ interface EstimateListProps {
   onOpenEstimate: (id: string) => void;
   onNewEstimate: () => void;
   onCreateContract?: (estimateId: string) => void;
+  onCreateInvoice?: (estimateId: string) => void;
   onDuplicate?: (id: string) => void;
 }
 
@@ -22,6 +23,7 @@ export function EstimateList({
   onOpenEstimate,
   onNewEstimate,
   onCreateContract,
+  onCreateInvoice,
   onDuplicate,
 }: EstimateListProps) {
   const [estimates, setEstimates] = useState<Estimate[]>([]);
@@ -51,6 +53,10 @@ export function EstimateList({
 
   function handleCreateContract(id: string) {
     onCreateContract?.(id);
+  }
+
+  function handleCreateInvoice(id: string) {
+    onCreateInvoice?.(id);
   }
 
   function handleImportEstimate(e: React.ChangeEvent<HTMLInputElement>) {
@@ -154,6 +160,7 @@ export function EstimateList({
               onDuplicate={handleDuplicate}
               onDelete={handleDelete}
               onCreateContract={handleCreateContract}
+              onCreateInvoice={handleCreateInvoice}
             />
           ))}
         </div>

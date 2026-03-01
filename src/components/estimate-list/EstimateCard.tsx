@@ -1,4 +1,4 @@
-import { FileText } from "lucide-react";
+import { FileText, Receipt } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate, computeGrandTotal } from "@/lib/estimate-utils";
 import type { Estimate } from "@/types";
@@ -9,6 +9,7 @@ interface EstimateCardProps {
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
   onCreateContract?: (id: string) => void;
+  onCreateInvoice?: (id: string) => void;
 }
 
 const STATUS_COLORS: Record<string, string> = {
@@ -24,6 +25,7 @@ export function EstimateCard({
   onDuplicate,
   onDelete,
   onCreateContract,
+  onCreateInvoice,
 }: EstimateCardProps) {
   const grandTotal = computeGrandTotal(estimate);
   const statusClass = STATUS_COLORS[estimate.status] ?? "bg-muted text-muted-foreground";
@@ -86,6 +88,17 @@ export function EstimateCard({
           >
             <FileText className="size-3.5 mr-1" />
             Contract
+          </Button>
+        )}
+        {onCreateInvoice && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => onCreateInvoice(estimate.id)}
+            className="text-sage-dark hover:bg-sage/10"
+          >
+            <Receipt className="size-3.5 mr-1" />
+            Invoice
           </Button>
         )}
         <Button

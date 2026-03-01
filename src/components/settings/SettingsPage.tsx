@@ -229,6 +229,42 @@ export function SettingsPage() {
         </div>
       </section>
 
+      {/* Invoice Defaults */}
+      <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+        <h3 className="text-base font-heading font-bold text-forest tracking-wide">
+          Invoice Defaults
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="invoicePrefix">Invoice # Prefix</Label>
+            <Input
+              id="invoicePrefix"
+              value={settings.invoiceNumberPrefix}
+              onChange={(e) =>
+                setSettings((prev) => ({
+                  ...prev,
+                  invoiceNumberPrefix: e.target.value,
+                }))
+              }
+            />
+          </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="invoicePaymentInstructions">Default Payment Instructions</Label>
+          <Textarea
+            id="invoicePaymentInstructions"
+            value={settings.defaults.invoicePaymentInstructions}
+            onChange={(e) => updateDefaults("invoicePaymentInstructions", e.target.value)}
+            rows={3}
+          />
+          <p className="text-xs text-muted-foreground">
+            Pre-populated on new invoices. Tells clients how to pay.
+          </p>
+        </div>
+      </section>
+
       {/* Default Terms */}
       <section className="rounded-lg border border-border bg-card p-6 space-y-4">
         <h3 className="text-base font-heading font-bold text-forest tracking-wide">

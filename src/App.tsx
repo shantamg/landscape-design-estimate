@@ -23,6 +23,8 @@ import { SettingsPage } from "@/components/settings/SettingsPage";
 import type { CatalogItem, Estimate } from "@/types";
 import defaultCatalog from "@/data/default-catalog.json";
 import { ContractForm } from "@/components/contract/ContractForm";
+import { InvoiceForm } from "@/components/invoice/InvoiceForm";
+import { InvoiceList } from "@/components/invoice/InvoiceList";
 import { AuthStatus } from "@/components/auth/AuthStatus";
 import { LoginPage } from "@/components/auth/LoginPage";
 import { useAuth } from "@/context/AuthContext";
@@ -47,8 +49,10 @@ function AppContent() {
   const [currentEstimate, setCurrentEstimate] = useState<Estimate | null>(null);
   // Key to force re-mount EstimateProvider when loading a different estimate
   const [estimateKey, setEstimateKey] = useState(0);
-  // Pre-selected estimate ID for contract creation
+  // Pre-selected estimate ID for contract/invoice creation
   const [contractEstimateId, setContractEstimateId] = useState<string>("");
+  const [invoiceEstimateId, setInvoiceEstimateId] = useState<string>("");
+  const [invoiceView, setInvoiceView] = useState<"form" | "list">("form");
   const [syncStatus, setSyncStatus] = useState(getSyncStatus());
 
   // Push all local data to cloud on mount (user just authenticated)
@@ -127,6 +131,12 @@ function AppContent() {
     setActiveTab("contracts");
   }, []);
 
+  const handleCreateInvoice = useCallback((estimateId: string) => {
+    setInvoiceEstimateId(estimateId);
+    setInvoiceView("form");
+    setActiveTab("invoices");
+  }, []);
+
   const handleDuplicate = useCallback((id: string) => {
     const dup = duplicateEstimate(id);
     if (dup) {
@@ -170,6 +180,7 @@ function AppContent() {
               <TabsTrigger value="new" className="data-[state=active]:bg-sage data-[state=active]:text-white rounded-md px-4">New Estimate</TabsTrigger>
               <TabsTrigger value="saved" className="data-[state=active]:bg-sage data-[state=active]:text-white rounded-md px-4">Saved Estimates</TabsTrigger>
               <TabsTrigger value="contracts" className="data-[state=active]:bg-sage data-[state=active]:text-white rounded-md px-4">Contracts</TabsTrigger>
+              <TabsTrigger value="invoices" className="data-[state=active]:bg-sage data-[state=active]:text-white rounded-md px-4">Invoices</TabsTrigger>
               <TabsTrigger value="settings" className="data-[state=active]:bg-sage data-[state=active]:text-white rounded-md px-4">Settings</TabsTrigger>
             </TabsList>
 
@@ -182,6 +193,7 @@ function AppContent() {
                 onOpenEstimate={handleOpenEstimate}
                 onNewEstimate={handleNewEstimate}
                 onCreateContract={handleCreateContract}
+                onCreateInvoice={handleCreateInvoice}
                 onDuplicate={handleDuplicate}
               />
             </TabsContent>
@@ -189,6 +201,47 @@ function AppContent() {
             <TabsContent value="contracts">
               <div className="rounded-lg border border-border bg-card p-6">
                 <ContractForm preSelectedEstimateId={contractEstimateId} />
+              </div>
+            </TabsContent>
+
+            <TabsContent value="invoices">
+              <div className="space-y-4">
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setInvoiceView("form")}
+                    className={`text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${
+                      invoiceView === "form"
+                        ? "bg-sage text-white"
+                        : "text-stone hover:bg-sage/10"
+                    }`}
+                  >
+                    New Invoice
+                  </button>
+                  <button
+                    onClick={() => setInvoiceView("list")}
+                    className={`text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${
+                      invoiceView === "list"
+                        ? "bg-sage text-white"
+                        : "text-stone hover:bg-sage/10"
+                    }`}
+                  >
+                    Saved Invoices
+                  </button>
+                </div>
+                {invoiceView === "form" ? (
+                  <div className="rounded-lg border border-border bg-card p-6">
+                    <InvoiceForm preSelectedEstimateId={invoiceEstimateId} />
+                  </div>
+                ) : (
+                  <InvoiceList
+                    onOpenInvoice={(id) => {
+                      // For now, switch to list view to see invoices
+                      // Future: load invoice into form for editing
+                      toast.info(`Invoice ${id} — editing coming soon`);
+                    }}
+                    onNewInvoice={() => setInvoiceView("form")}
+                  />
+                )}
               </div>
             </TabsContent>
 

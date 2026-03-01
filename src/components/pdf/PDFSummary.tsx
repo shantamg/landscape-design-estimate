@@ -1,5 +1,5 @@
 import { View, Text } from "@react-pdf/renderer";
-import type { Estimate } from "@/types";
+import type { PriceableDocument } from "@/lib/estimate-utils";
 import { styles } from "./pdf-styles";
 import {
   formatCurrency,
@@ -12,7 +12,7 @@ import {
 } from "@/lib/estimate-utils";
 
 interface PDFSummaryProps {
-  estimate: Estimate;
+  estimate: PriceableDocument;
 }
 
 export function PDFSummary({ estimate }: PDFSummaryProps) {
