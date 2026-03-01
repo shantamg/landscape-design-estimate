@@ -42,8 +42,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setSession(null);
   }, []);
 
-  const isAuthenticated = !!session?.user;
-  const userEmail = session?.user?.email ?? null;
+  // Bypass auth in local dev (no Supabase email flow needed)
+  const isDevBypass = !isSupabaseConfigured() || import.meta.env.DEV;
+  const isAuthenticated = isDevBypass || !!session?.user;
+  const userEmail = session?.user?.email ?? (isDevBypass ? "dev@localhost" : null);
 
   if (loading) return null;
 

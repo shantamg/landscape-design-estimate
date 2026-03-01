@@ -3,13 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { EstimateCombobox } from "@/components/ui/estimate-combobox";
 import { toast } from "sonner";
 import {
   listEstimates,
@@ -316,28 +310,12 @@ export function ContractForm({ preSelectedEstimateId }: ContractFormProps) {
           </Label>
         </div>
 
-        <Select
+        <EstimateCombobox
+          estimates={estimates}
           value={selectedEstimateId}
           onValueChange={setSelectedEstimateId}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select an estimate..." />
-          </SelectTrigger>
-          <SelectContent>
-            {estimates.length === 0 ? (
-              <SelectItem value="none" disabled>
-                No saved estimates
-              </SelectItem>
-            ) : (
-              estimates.map((est) => (
-                <SelectItem key={est.id} value={est.id}>
-                  {est.estimateNumber} - {est.client.name || "Unnamed"} (
-                  {formatDate(est.createdAt)})
-                </SelectItem>
-              ))
-            )}
-          </SelectContent>
-        </Select>
+          placeholder="Search estimates..."
+        />
 
         {selectedEstimate && (
           <div className="grid grid-cols-3 gap-4 pt-2 text-sm">
