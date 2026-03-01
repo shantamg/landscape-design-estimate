@@ -3,7 +3,14 @@ import type {
   ProjectSection,
   Estimate,
   LineItemCategory,
+  Invoice,
 } from "@/types";
+
+/** Subset of Estimate/Invoice fields needed for price computation */
+export type PriceableDocument = Pick<
+  Estimate,
+  "projectSections" | "designFee" | "taxRate" | "taxableCategories"
+>;
 
 // --- Line-level ---
 
@@ -33,7 +40,7 @@ export function computeProjectSectionSubtotal(
 
 /** Sum all items in a given category across all project sections */
 export function computeCategoryTotal(
-  estimate: Estimate,
+  estimate: PriceableDocument,
   category: "plantMaterial" | "laborAndServices" | "otherMaterials"
 ): number {
   return estimate.projectSections.reduce(
@@ -43,12 +50,12 @@ export function computeCategoryTotal(
 }
 
 /** Sum of design fee line items */
-export function computeDesignFeeTotal(estimate: Estimate): number {
+export function computeDesignFeeTotal(estimate: PriceableDocument): number {
   return computeSectionSubtotal(estimate.designFee);
 }
 
 /** Total of all taxable categories (plant material + other materials by default) */
-export function computeTaxableTotal(estimate: Estimate): number {
+export function computeTaxableTotal(estimate: PriceableDocument): number {
   const taxableCategories = estimate.taxableCategories;
 
   let total = 0;
@@ -74,7 +81,7 @@ export function computeTaxableTotal(estimate: Estimate): number {
 }
 
 /** Total of all non-taxable items */
-export function computeNonTaxableTotal(estimate: Estimate): number {
+export function computeNonTaxableTotal(estimate: PriceableDocument): number {
   const taxableCategories = estimate.taxableCategories;
 
   let total = 0;
@@ -97,13 +104,13 @@ export function computeNonTaxableTotal(estimate: Estimate): number {
 }
 
 /** Compute tax amount */
-export function computeTax(estimate: Estimate): number {
+export function computeTax(estimate: PriceableDocument): number {
   const taxableTotal = computeTaxableTotal(estimate);
   return Math.round(taxableTotal * (estimate.taxRate / 100) * 100) / 100;
 }
 
 /** Grand total: all items + tax */
-export function computeGrandTotal(estimate: Estimate): number {
+export function computeGrandTotal(estimate: PriceableDocument): number {
   let total = 0;
 
   // Sum all project sections
@@ -121,7 +128,7 @@ export function computeGrandTotal(estimate: Estimate): number {
 }
 
 /** Subtotal before tax (all items, no tax) */
-export function computeSubtotal(estimate: Estimate): number {
+export function computeSubtotal(estimate: PriceableDocument): number {
   let total = 0;
   for (const section of estimate.projectSections) {
     total += computeProjectSectionSubtotal(section);
@@ -160,6 +167,25 @@ export function generateEstimateNumber(
   const year = new Date().getFullYear();
   const padded = String(nextNumber).padStart(3, "0");
   return `${prefix}-${year}-${padded}`;
+}
+
+export function generateInvoiceNumber(
+  prefix: string,
+  nextNumber: number
+): string {
+  const year = new Date().getFullYear();
+  const padded = String(nextNumber).padStart(3, "0");
+  return `${prefix}-INV-${year}-${padded}`;
+}
+
+/** Sum of all payments recorded on an invoice */
+export function computeAmountPaid(invoice: Invoice): number {
+  return invoice.payments.reduce((sum, p) => sum + p.amount, 0);
+}
+
+/** Grand total minus amount paid */
+export function computeBalanceRemaining(invoice: Invoice): number {
+  return computeGrandTotal(invoice) - computeAmountPaid(invoice);
 }
 
 // --- Category helpers ---

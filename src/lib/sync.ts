@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Estimate, Contract, Settings, CatalogItem } from "@/types";
+import type { Estimate, Contract, Invoice, Settings, CatalogItem } from "@/types";
 
 type SyncStatus = "idle" | "syncing" | "synced" | "error";
 type SyncListener = (status: SyncStatus) => void;
@@ -155,6 +155,27 @@ export async function deleteEstimateFromCloud(id: string): Promise<void> {
   if (error) console.error("[sync] estimate delete failed:", error);
 }
 
+export async function syncInvoices(invoices: Invoice[]): Promise<void> {
+  const userId = await getUserId();
+  if (!supabase || !userId) return;
+
+  for (const invoice of invoices) {
+    const { error } = await supabase.from("invoices").upsert(
+      {
+        id: invoice.id,
+        user_id: userId,
+        estimate_id: invoice.estimateId || null,
+        invoice_number: invoice.invoiceNumber,
+        status: invoice.status,
+        data: invoice,
+        updated_at: invoice.updatedAt,
+      },
+      { onConflict: "id" }
+    );
+    if (error) console.error("[sync] invoice upsert failed:", error);
+  }
+}
+
 export async function deleteContractFromCloud(id: string): Promise<void> {
   const userId = await getUserId();
   if (!supabase || !userId) return;
@@ -167,11 +188,24 @@ export async function deleteContractFromCloud(id: string): Promise<void> {
   if (error) console.error("[sync] contract delete failed:", error);
 }
 
+export async function deleteInvoiceFromCloud(id: string): Promise<void> {
+  const userId = await getUserId();
+  if (!supabase || !userId) return;
+
+  const { error } = await supabase
+    .from("invoices")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", userId);
+  if (error) console.error("[sync] invoice delete failed:", error);
+}
+
 // --- Pull from cloud (initial sync on sign-in) ---
 
 export async function pullFromCloud(): Promise<{
   estimates: Estimate[];
   contracts: Contract[];
+  invoices: Invoice[];
   settings: Settings | null;
   catalogs: { plant: CatalogItem[]; service: CatalogItem[]; material: CatalogItem[] };
 } | null> {
@@ -180,9 +214,10 @@ export async function pullFromCloud(): Promise<{
 
   setStatus("syncing");
   try {
-    const [estRes, contractRes, settingsRes, catalogRes] = await Promise.all([
+    const [estRes, contractRes, invoiceRes, settingsRes, catalogRes] = await Promise.all([
       supabase.from("estimates").select("data").eq("user_id", userId),
       supabase.from("contracts").select("data").eq("user_id", userId),
+      supabase.from("invoices").select("data").eq("user_id", userId),
       supabase.from("settings").select("data").eq("user_id", userId).single(),
       supabase.from("catalogs").select("catalog_type, data").eq("user_id", userId),
     ]);
@@ -199,6 +234,7 @@ export async function pullFromCloud(): Promise<{
     return {
       estimates: (estRes.data ?? []).map((r) => r.data as Estimate),
       contracts: (contractRes.data ?? []).map((r) => r.data as Contract),
+      invoices: (invoiceRes.data ?? []).map((r) => r.data as Invoice),
       settings: settingsRes.data ? (settingsRes.data.data as Settings) : null,
       catalogs,
     };
@@ -214,6 +250,7 @@ export async function pullFromCloud(): Promise<{
 export async function pushAllToCloud(data: {
   estimates: Estimate[];
   contracts: Contract[];
+  invoices: Invoice[];
   settings: Settings;
   catalogs: { plant: CatalogItem[]; service: CatalogItem[]; material: CatalogItem[] };
 }): Promise<void> {
@@ -222,6 +259,7 @@ export async function pushAllToCloud(data: {
     await Promise.all([
       syncEstimates(data.estimates),
       syncContracts(data.contracts),
+      syncInvoices(data.invoices),
       syncSettings(data.settings),
       syncCatalog("plant", data.catalogs.plant),
       syncCatalog("service", data.catalogs.service),

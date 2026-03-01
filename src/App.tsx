@@ -10,6 +10,7 @@ import {
   duplicateEstimate,
   listEstimates,
   listContracts,
+  listInvoices,
   loadCatalog,
 } from "@/lib/storage";
 import {
@@ -57,6 +58,7 @@ function AppContent() {
     pushAllToCloud({
       estimates: listEstimates(),
       contracts: listContracts(),
+      invoices: listInvoices(),
       settings: loadSettings(),
       catalogs: {
         plant: loadCatalog("plant"),

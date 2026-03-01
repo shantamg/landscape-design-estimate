@@ -13,6 +13,7 @@ import {
 import {
   listEstimates,
   listContracts,
+  listInvoices,
   loadSettings,
   loadCatalog,
 } from "@/lib/storage";
@@ -86,6 +87,7 @@ export function CloudSyncSection() {
     await pushAllToCloud({
       estimates: listEstimates(),
       contracts: listContracts(),
+      invoices: listInvoices(),
       settings: loadSettings(),
       catalogs: {
         plant: loadCatalog("plant"),

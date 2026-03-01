@@ -153,10 +153,13 @@ export interface Settings {
     exclusions: string;
     designFeeDescription: string;
     designFeePrice: number;
+    invoicePaymentInstructions: string;
   };
 
   estimateNumberPrefix: string; // "NL"
   nextEstimateNumber: number; // Auto-incremented
+  invoiceNumberPrefix: string; // "NL"
+  nextInvoiceNumber: number; // Auto-incremented
 }
 
 // --- Contract (separate from Estimate) ---
@@ -183,4 +186,42 @@ export interface Contract {
   acceptedDate: string;
   clientSignature: string; // Base64 image or empty
   contractorSignature: string;
+}
+
+// --- Invoice Types ---
+export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue";
+export type DueDateTerms = "net30" | "net15" | "due_on_receipt" | "custom";
+export type PaymentMethod = "check" | "venmo" | "zelle" | "credit_card" | "cash" | "other";
+
+export interface Payment {
+  id: string;
+  date: string; // ISO date
+  amount: number;
+  method: PaymentMethod;
+  note: string;
+}
+
+export interface Invoice {
+  id: string;
+  estimateId: string; // Links to source estimate
+  invoiceNumber: string; // "NL-INV-2026-001"
+  status: InvoiceStatus;
+  createdAt: string;
+  updatedAt: string;
+
+  // Inherited from estimate
+  client: ClientInfo;
+  projectDescription: string;
+  projectSections: ProjectSection[];
+  designFee: LineItem[];
+  taxRate: number;
+  taxableCategories: LineItemCategory[];
+
+  // Invoice-specific
+  invoiceDate: string; // ISO date
+  dueDate: string; // ISO date
+  dueDateTerms: DueDateTerms;
+  payments: Payment[];
+  paymentInstructions: string;
+  notes: string;
 }

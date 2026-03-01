@@ -1,19 +1,22 @@
-import type { Estimate, Settings, CatalogItem, Contract } from "@/types";
-import { generateEstimateNumber } from "./estimate-utils";
+import type { Estimate, Settings, CatalogItem, Contract, Invoice } from "@/types";
+import { generateEstimateNumber, generateInvoiceNumber } from "./estimate-utils";
 import {
   queueSync,
   syncEstimates,
   syncContracts,
+  syncInvoices,
   syncSettings,
   syncCatalog,
   deleteEstimateFromCloud,
   deleteContractFromCloud,
+  deleteInvoiceFromCloud,
 } from "./sync";
 
 // --- Storage Keys ---
 const KEYS = {
   estimates: "nlgd_estimates",
   contracts: "nlgd_contracts",
+  invoices: "nlgd_invoices",
   settings: "nlgd_settings",
   plantCatalog: "nlgd_plant_catalog",
   serviceCatalog: "nlgd_service_catalog",
@@ -46,9 +49,13 @@ const DEFAULT_SETTINGS: Settings = {
       "This estimate does not include permits, engineering, or structural work unless specifically noted. Any unforeseen conditions discovered during construction may result in additional charges, which will be discussed and approved before proceeding.",
     designFeeDescription: "Design Fee — Property design",
     designFeePrice: 5000,
+    invoicePaymentInstructions:
+      "Please make checks payable to Nancy Lyons Garden Design. Venmo and Zelle also accepted.",
   },
   estimateNumberPrefix: "NL",
   nextEstimateNumber: 1,
+  invoiceNumberPrefix: "NL",
+  nextInvoiceNumber: 1,
 };
 
 // --- Generic Helpers ---
@@ -136,7 +143,13 @@ export function loadSettings(): Settings {
     setItem(KEYS.settings, DEFAULT_SETTINGS);
     return { ...DEFAULT_SETTINGS };
   }
-  return stored;
+  // Merge with defaults so new fields are always present for existing users
+  return {
+    ...DEFAULT_SETTINGS,
+    ...stored,
+    defaults: { ...DEFAULT_SETTINGS.defaults, ...stored.defaults },
+    company: { ...DEFAULT_SETTINGS.company, ...stored.company },
+  };
 }
 
 export function saveSettings(settings: Settings): void {
@@ -157,6 +170,22 @@ export function getNextEstimateNumber(): string {
 export function incrementEstimateNumber(): void {
   const settings = loadSettings();
   settings.nextEstimateNumber++;
+  saveSettings(settings);
+}
+
+// --- Invoice Number ---
+
+export function getNextInvoiceNumber(): string {
+  const settings = loadSettings();
+  return generateInvoiceNumber(
+    settings.invoiceNumberPrefix,
+    settings.nextInvoiceNumber
+  );
+}
+
+export function incrementInvoiceNumber(): void {
+  const settings = loadSettings();
+  settings.nextInvoiceNumber++;
   saveSettings(settings);
 }
 
@@ -191,6 +220,39 @@ export function deleteContract(id: string): void {
   const contracts = listContracts().filter((c) => c.id !== id);
   setItem(KEYS.contracts, contracts);
   queueSync(`delete-contract-${id}`, () => deleteContractFromCloud(id));
+}
+
+// --- Invoice CRUD ---
+
+export function listInvoices(): Invoice[] {
+  return getItem<Invoice[]>(KEYS.invoices) ?? [];
+}
+
+export function loadInvoice(id: string): Invoice | null {
+  const invoices = listInvoices();
+  return invoices.find((i) => i.id === id) ?? null;
+}
+
+export function saveInvoice(invoice: Invoice): void {
+  const invoices = listInvoices();
+  const index = invoices.findIndex((i) => i.id === invoice.id);
+
+  const updated = { ...invoice, updatedAt: new Date().toISOString() };
+
+  if (index >= 0) {
+    invoices[index] = updated;
+  } else {
+    invoices.push(updated);
+  }
+
+  setItem(KEYS.invoices, invoices);
+  queueSync("invoices", () => syncInvoices(listInvoices()));
+}
+
+export function deleteInvoice(id: string): void {
+  const invoices = listInvoices().filter((i) => i.id !== id);
+  setItem(KEYS.invoices, invoices);
+  queueSync(`delete-invoice-${id}`, () => deleteInvoiceFromCloud(id));
 }
 
 // --- Catalog ---
@@ -325,6 +387,7 @@ export interface ExportData {
   version: 1;
   exportedAt: string;
   estimates: Estimate[];
+  invoices?: Invoice[];
   settings: Settings;
   catalogs: {
     plants: CatalogItem[];
@@ -338,6 +401,7 @@ export function exportAllData(): ExportData {
     version: 1,
     exportedAt: new Date().toISOString(),
     estimates: listEstimates(),
+    invoices: listInvoices(),
     settings: loadSettings(),
     catalogs: {
       plants: loadCatalog("plant"),
@@ -353,6 +417,7 @@ export function importData(data: ExportData): void {
   }
 
   setItem(KEYS.estimates, data.estimates);
+  setItem(KEYS.invoices, data.invoices ?? []);
   setItem(KEYS.settings, data.settings);
   saveCatalog("plant", data.catalogs.plants);
   saveCatalog("service", data.catalogs.services);
