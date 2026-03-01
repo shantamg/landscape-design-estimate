@@ -18,14 +18,12 @@ const STATUS_COLORS: Record<InvoiceStatus, string> = {
   unpaid: "bg-amber-100 text-amber-800",
   partial: "bg-blue-100 text-blue-800",
   paid: "bg-sage/20 text-forest",
-  overdue: "bg-red-100 text-red-800",
 };
 
 const STATUS_LABELS: Record<InvoiceStatus, string> = {
   unpaid: "Unpaid",
   partial: "Partial",
   paid: "Paid",
-  overdue: "Overdue",
 };
 
 function getEffectiveStatus(invoice: Invoice): InvoiceStatus {
@@ -33,9 +31,6 @@ function getEffectiveStatus(invoice: Invoice): InvoiceStatus {
   const amountPaid = computeAmountPaid(invoice);
   if (amountPaid >= grandTotal && grandTotal > 0) return "paid";
   if (amountPaid > 0) return "partial";
-  const now = new Date();
-  const due = new Date(invoice.dueDate);
-  if (due < now) return "overdue";
   return "unpaid";
 }
 
@@ -63,7 +58,7 @@ export function InvoiceCard({ invoice, onOpen, onDelete }: InvoiceCardProps) {
             {invoice.client.name || invoice.client.address || "No client"}
           </p>
           <p className="text-xs text-stone">
-            Due {formatDate(invoice.dueDate)}
+            {formatDate(invoice.invoiceDate)}
           </p>
         </div>
         <div className="text-right shrink-0">

@@ -27,19 +27,12 @@ import {
   formatCurrency,
   formatDate,
 } from "@/lib/estimate-utils";
-import type { Invoice, Estimate, DueDateTerms, PaymentMethod, Payment } from "@/types";
+import type { Invoice, Estimate, PaymentMethod, Payment } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 import { InvoicePreviewModal } from "@/components/pdf/InvoicePreviewModal";
 import { FileText, Eye, Download, Save, Plus, Trash2 } from "lucide-react";
 import { pdf } from "@react-pdf/renderer";
 import { InvoicePDF } from "@/components/pdf/InvoicePDF";
-
-const DUE_DATE_OPTIONS: { value: DueDateTerms; label: string; days: number | null }[] = [
-  { value: "due_on_receipt", label: "Due on Receipt", days: 0 },
-  { value: "net15", label: "Net 15", days: 15 },
-  { value: "net30", label: "Net 30", days: 30 },
-  { value: "custom", label: "Custom Date", days: null },
-];
 
 const PAYMENT_METHOD_OPTIONS: { value: PaymentMethod; label: string }[] = [
   { value: "check", label: "Check" },
@@ -49,14 +42,6 @@ const PAYMENT_METHOD_OPTIONS: { value: PaymentMethod; label: string }[] = [
   { value: "cash", label: "Cash" },
   { value: "other", label: "Other" },
 ];
-
-function computeDueDate(invoiceDate: string, terms: DueDateTerms): string {
-  const option = DUE_DATE_OPTIONS.find((o) => o.value === terms);
-  if (!option || option.days === null) return "";
-  const date = new Date(invoiceDate);
-  date.setDate(date.getDate() + option.days);
-  return date.toISOString().split("T")[0];
-}
 
 interface InvoiceFormProps {
   preSelectedEstimateId?: string;
@@ -73,9 +58,7 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
     const num = getNextInvoiceNumber();
     return num;
   });
-  const [dueDateTerms, setDueDateTerms] = useState<DueDateTerms>("net30");
   const [invoiceDate, setInvoiceDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [dueDate, setDueDate] = useState(() => computeDueDate(new Date().toISOString().split("T")[0], "net30"));
   const [paymentInstructions, setPaymentInstructions] = useState(settings.defaults.invoicePaymentInstructions);
   const [notes, setNotes] = useState("");
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -102,13 +85,6 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
     }
     setSelectedEstimate(loadEstimate(selectedEstimateId));
   }, [selectedEstimateId]);
-
-  // Update due date when terms or invoice date changes
-  useEffect(() => {
-    if (dueDateTerms !== "custom") {
-      setDueDate(computeDueDate(invoiceDate, dueDateTerms));
-    }
-  }, [dueDateTerms, invoiceDate]);
 
   const addPayment = () => {
     setPayments((prev) => [
@@ -150,8 +126,6 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
       taxRate: selectedEstimate.taxRate,
       taxableCategories: [...selectedEstimate.taxableCategories],
       invoiceDate,
-      dueDate,
-      dueDateTerms,
       payments,
       paymentInstructions,
       notes,
@@ -161,8 +135,6 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
     invoiceId,
     invoiceNumber,
     invoiceDate,
-    dueDate,
-    dueDateTerms,
     payments,
     paymentInstructions,
     notes,
@@ -183,9 +155,7 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
     } else if (amountPaid > 0) {
       invoice.status = "partial";
     } else {
-      const now = new Date();
-      const due = new Date(invoice.dueDate);
-      invoice.status = due < now ? "overdue" : "unpaid";
+      invoice.status = "unpaid";
     }
 
     saveInvoice(invoice);
@@ -299,43 +269,14 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
           Invoice Details
         </Label>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="space-y-1.5">
-            <Label htmlFor="invoiceDate">Invoice Date</Label>
-            <Input
-              id="invoiceDate"
-              type="date"
-              value={invoiceDate}
-              onChange={(e) => setInvoiceDate(e.target.value)}
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="dueDateTerms">Due Date Terms</Label>
-            <Select value={dueDateTerms} onValueChange={(v) => setDueDateTerms(v as DueDateTerms)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DUE_DATE_OPTIONS.map((opt) => (
-                  <SelectItem key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="dueDate">Due Date</Label>
-            <Input
-              id="dueDate"
-              type="date"
-              value={dueDate}
-              onChange={(e) => {
-                setDueDate(e.target.value);
-                setDueDateTerms("custom");
-              }}
-            />
-          </div>
+        <div className="space-y-1.5 max-w-xs">
+          <Label htmlFor="invoiceDate">Invoice Date</Label>
+          <Input
+            id="invoiceDate"
+            type="date"
+            value={invoiceDate}
+            onChange={(e) => setInvoiceDate(e.target.value)}
+          />
         </div>
       </div>
 

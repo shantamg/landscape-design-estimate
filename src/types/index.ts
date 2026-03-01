@@ -189,8 +189,7 @@ export interface Contract {
 }
 
 // --- Invoice Types ---
-export type InvoiceStatus = "unpaid" | "partial" | "paid" | "overdue";
-export type DueDateTerms = "net30" | "net15" | "due_on_receipt" | "custom";
+export type InvoiceStatus = "unpaid" | "partial" | "paid";
 export type PaymentMethod = "check" | "venmo" | "zelle" | "credit_card" | "cash" | "other";
 
 export interface Payment {
@@ -219,8 +218,6 @@ export interface Invoice {
 
   // Invoice-specific
   invoiceDate: string; // ISO date
-  dueDate: string; // ISO date
-  dueDateTerms: DueDateTerms;
   payments: Payment[];
   paymentInstructions: string;
   notes: string;

@@ -353,9 +353,6 @@ export function InvoicePDF({ invoice, company, estimateNumber }: InvoicePDFProps
             <Text style={s.metaDetail}>
               Date: {formatDate(invoice.invoiceDate)}
             </Text>
-            <Text style={s.metaDetailBold}>
-              Due: {formatDate(invoice.dueDate)}
-            </Text>
           </View>
         </View>
 
