@@ -1,5 +1,5 @@
-import { useCallback } from "react";
-import { Trash2, DollarSign } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Trash2, DollarSign, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LineItemAutocomplete } from "./LineItemAutocomplete";
 import { formatCurrency } from "@/lib/estimate-utils";
@@ -101,6 +101,31 @@ function UnitSelect({
   );
 }
 
+function SubItemsPanel({
+  subItems,
+  onChange,
+}: {
+  subItems: string[];
+  onChange: (items: string[]) => void;
+}) {
+  const text = subItems.join("\n");
+  return (
+    <div className="ml-6 mt-1.5 mb-2">
+      <span className="text-[11px] text-stone italic">Includes:</span>
+      <textarea
+        value={text}
+        onChange={(e) => {
+          const lines = e.target.value.split("\n");
+          onChange(lines);
+        }}
+        placeholder="One item per line..."
+        rows={Math.max(2, (text.match(/\n/g)?.length ?? 0) + 2)}
+        className="mt-1 w-full rounded border border-input bg-muted/40 px-2.5 py-1.5 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow] resize-y"
+      />
+    </div>
+  );
+}
+
 export function LineItemRow({
   item,
   sectionType,
@@ -109,7 +134,44 @@ export function LineItemRow({
   onEnterOnLast,
   isLast,
 }: LineItemRowProps) {
+  const hasSubItems = item.subItems && item.subItems.some((s) => s.trim());
+  const [showSubItems, setShowSubItems] = useState(!!hasSubItems);
   const lineTotal = item.quantity * item.unitPrice;
+
+  const toggleSubItems = () => {
+    if (showSubItems) {
+      // Collapsing — clear sub-items if all empty
+      const hasContent = item.subItems?.some((s) => s.trim());
+      if (!hasContent) {
+        onUpdate({ subItems: undefined });
+      }
+      setShowSubItems(false);
+    } else {
+      if (!item.subItems || item.subItems.length === 0) {
+        onUpdate({ subItems: [""] });
+      }
+      setShowSubItems(true);
+    }
+  };
+
+  const subItemsButton = (
+    <Button
+      variant="ghost"
+      size="icon-xs"
+      onClick={toggleSubItems}
+      className={hasSubItems ? "text-sage hover:text-sage-dark hover:bg-sage/10" : "text-stone hover:text-sage hover:bg-sage/10"}
+      title={showSubItems ? "Hide detail list" : "Add detail list"}
+    >
+      <List className="size-3.5" />
+    </Button>
+  );
+
+  const subItemsPanel = showSubItems && (
+    <SubItemsPanel
+      subItems={item.subItems || [""]}
+      onChange={(items) => onUpdate({ subItems: items })}
+    />
+  );
 
   const handleCatalogSelect = useCallback(
     (catalogItem: CatalogItem) => {
@@ -131,61 +193,183 @@ export function LineItemRow({
 
   if (sectionType === "plant") {
     return (
-      <div className="grid grid-cols-[1fr_120px_60px_90px_90px_32px] gap-2 items-center" onKeyDown={handleKeyDown}>
-        <LineItemAutocomplete
-          value={item.description}
-          onChange={(v) => onUpdate({ description: v })}
-          onSelect={handleCatalogSelect}
-          catalogType={CATALOG_TYPE_MAP[sectionType]}
-          placeholder="Plant name..."
-        />
-        <select
-          value={item.unit}
-          onChange={(e) => onUpdate({ unit: e.target.value })}
-          className="h-8 rounded border border-input bg-transparent px-1.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow] cursor-pointer"
-        >
-          {PLANT_SIZES.map((size) => (
-            <option key={size} value={size}>
-              {size}
-            </option>
-          ))}
-        </select>
-        <NumberInput
-          value={item.quantity}
-          onChange={(v) => onUpdate({ quantity: v })}
-          className="w-full"
-          min={0}
-        />
-        <NumberInput
-          value={item.unitPrice}
-          onChange={(v) => onUpdate({ unitPrice: v })}
-          className="w-full"
-          isCurrency
-        />
-        <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
-          {formatCurrency(lineTotal)}
+      <div>
+        <div className="grid grid-cols-[1fr_120px_60px_90px_90px_56px] gap-2 items-center" onKeyDown={handleKeyDown}>
+          <LineItemAutocomplete
+            value={item.description}
+            onChange={(v) => onUpdate({ description: v })}
+            onSelect={handleCatalogSelect}
+            catalogType={CATALOG_TYPE_MAP[sectionType]}
+            placeholder="Plant name..."
+          />
+          <select
+            value={item.unit}
+            onChange={(e) => onUpdate({ unit: e.target.value })}
+            className="h-8 rounded border border-input bg-transparent px-1.5 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow] cursor-pointer"
+          >
+            {PLANT_SIZES.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
+          <NumberInput
+            value={item.quantity}
+            onChange={(v) => onUpdate({ quantity: v })}
+            className="w-full"
+            min={0}
+          />
+          <NumberInput
+            value={item.unitPrice}
+            onChange={(v) => onUpdate({ unitPrice: v })}
+            className="w-full"
+            isCurrency
+          />
+          <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
+            {formatCurrency(lineTotal)}
+          </div>
+          <div className="flex items-center gap-0.5">
+            {subItemsButton}
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={onRemove}
+              className="text-stone hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={onRemove}
-          className="text-stone hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="size-3.5" />
-        </Button>
+        {subItemsPanel}
       </div>
     );
   }
 
   if (sectionType === "labor") {
     return (
+      <div>
+        <div className="grid grid-cols-[1fr_60px_70px_90px_90px_80px] gap-2 items-center" onKeyDown={handleKeyDown}>
+          <LineItemAutocomplete
+            value={item.description}
+            onChange={(v) => onUpdate({ description: v })}
+            onSelect={handleCatalogSelect}
+            catalogType={CATALOG_TYPE_MAP[sectionType]}
+            placeholder="Service description..."
+          />
+          <NumberInput
+            value={item.quantity}
+            onChange={(v) => onUpdate({ quantity: v })}
+            className="w-full"
+            min={0}
+          />
+          <UnitSelect
+            value={item.unit}
+            options={LABOR_UNITS}
+            onChange={(v) => onUpdate({ unit: v })}
+          />
+          {item.noPrice ? (
+            <>
+              <div className="col-span-2 text-[10px] text-stone italic text-right pr-1">
+                no price
+              </div>
+            </>
+          ) : (
+            <>
+              <NumberInput
+                value={item.unitPrice}
+                onChange={(v) => onUpdate({ unitPrice: v })}
+                className="w-full"
+                isCurrency
+              />
+              <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
+                {formatCurrency(lineTotal)}
+              </div>
+            </>
+          )}
+          <div className="flex items-center gap-0.5">
+            {subItemsButton}
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={() => onUpdate({ noPrice: !item.noPrice, unitPrice: item.noPrice ? item.unitPrice : 0 })}
+              className={item.noPrice ? "text-sage hover:text-sage-dark hover:bg-sage/10" : "text-stone hover:text-sage hover:bg-sage/10"}
+              title={item.noPrice ? "Add price to this line" : "Remove price (description only)"}
+            >
+              <DollarSign className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={onRemove}
+              className="text-stone hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </div>
+        </div>
+        {subItemsPanel}
+      </div>
+    );
+  }
+
+  if (sectionType === "material") {
+    return (
+      <div>
+        <div className="grid grid-cols-[1fr_60px_80px_90px_90px_56px] gap-2 items-center" onKeyDown={handleKeyDown}>
+          <LineItemAutocomplete
+            value={item.description}
+            onChange={(v) => onUpdate({ description: v })}
+            onSelect={handleCatalogSelect}
+            catalogType={CATALOG_TYPE_MAP[sectionType]}
+            placeholder="Material description..."
+          />
+          <NumberInput
+            value={item.quantity}
+            onChange={(v) => onUpdate({ quantity: v })}
+            className="w-full"
+            min={0}
+          />
+          <UnitSelect
+            value={item.unit}
+            options={MATERIAL_UNITS}
+            onChange={(v) => onUpdate({ unit: v })}
+          />
+          <NumberInput
+            value={item.unitPrice}
+            onChange={(v) => onUpdate({ unitPrice: v })}
+            className="w-full"
+            isCurrency
+          />
+          <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
+            {formatCurrency(lineTotal)}
+          </div>
+          <div className="flex items-center gap-0.5">
+            {subItemsButton}
+            <Button
+              variant="ghost"
+              size="icon-xs"
+              onClick={onRemove}
+              className="text-stone hover:text-destructive hover:bg-destructive/10"
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
+          </div>
+        </div>
+        {subItemsPanel}
+      </div>
+    );
+  }
+
+  // designFee / supervision
+  return (
+    <div>
       <div className="grid grid-cols-[1fr_60px_70px_90px_90px_56px] gap-2 items-center" onKeyDown={handleKeyDown}>
-        <LineItemAutocomplete
+        <input
+          type="text"
           value={item.description}
-          onChange={(v) => onUpdate({ description: v })}
-          onSelect={handleCatalogSelect}
-          catalogType={CATALOG_TYPE_MAP[sectionType]}
-          placeholder="Service description..."
+          onChange={(e) => onUpdate({ description: e.target.value })}
+          placeholder="Description..."
+          className="h-8 w-full min-w-0 rounded border border-input bg-transparent px-2 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow]"
         />
         <NumberInput
           value={item.quantity}
@@ -194,39 +378,21 @@ export function LineItemRow({
           min={0}
         />
         <UnitSelect
-          value={item.unit}
-          options={LABOR_UNITS}
+          value={item.unit || "hr"}
+          options={["hr", "lot", "ea"]}
           onChange={(v) => onUpdate({ unit: v })}
         />
-        {item.noPrice ? (
-          <>
-            <div className="col-span-2 text-[10px] text-stone italic text-right pr-1">
-              no price
-            </div>
-          </>
-        ) : (
-          <>
-            <NumberInput
-              value={item.unitPrice}
-              onChange={(v) => onUpdate({ unitPrice: v })}
-              className="w-full"
-              isCurrency
-            />
-            <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
-              {formatCurrency(lineTotal)}
-            </div>
-          </>
-        )}
+        <NumberInput
+          value={item.unitPrice || (sectionType === "designFee" || sectionType === "supervision" ? 195 : 0)}
+          onChange={(v) => onUpdate({ unitPrice: v })}
+          className="w-full"
+          isCurrency
+        />
+        <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
+          {formatCurrency(lineTotal)}
+        </div>
         <div className="flex items-center gap-0.5">
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            onClick={() => onUpdate({ noPrice: !item.noPrice, unitPrice: item.noPrice ? item.unitPrice : 0 })}
-            className={item.noPrice ? "text-sage hover:text-sage-dark hover:bg-sage/10" : "text-stone hover:text-sage hover:bg-sage/10"}
-            title={item.noPrice ? "Add price to this line" : "Remove price (description only)"}
-          >
-            <DollarSign className="size-3.5" />
-          </Button>
+          {subItemsButton}
           <Button
             variant="ghost"
             size="icon-xs"
@@ -237,89 +403,7 @@ export function LineItemRow({
           </Button>
         </div>
       </div>
-    );
-  }
-
-  if (sectionType === "material") {
-    return (
-      <div className="grid grid-cols-[1fr_60px_80px_90px_90px_32px] gap-2 items-center" onKeyDown={handleKeyDown}>
-        <LineItemAutocomplete
-          value={item.description}
-          onChange={(v) => onUpdate({ description: v })}
-          onSelect={handleCatalogSelect}
-          catalogType={CATALOG_TYPE_MAP[sectionType]}
-          placeholder="Material description..."
-        />
-        <NumberInput
-          value={item.quantity}
-          onChange={(v) => onUpdate({ quantity: v })}
-          className="w-full"
-          min={0}
-        />
-        <UnitSelect
-          value={item.unit}
-          options={MATERIAL_UNITS}
-          onChange={(v) => onUpdate({ unit: v })}
-        />
-        <NumberInput
-          value={item.unitPrice}
-          onChange={(v) => onUpdate({ unitPrice: v })}
-          className="w-full"
-          isCurrency
-        />
-        <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
-          {formatCurrency(lineTotal)}
-        </div>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={onRemove}
-          className="text-stone hover:text-destructive hover:bg-destructive/10"
-        >
-          <Trash2 className="size-3.5" />
-        </Button>
-      </div>
-    );
-  }
-
-  // designFee / supervision
-  return (
-    <div className="grid grid-cols-[1fr_60px_70px_90px_90px_32px] gap-2 items-center" onKeyDown={handleKeyDown}>
-      <input
-        type="text"
-        value={item.description}
-        onChange={(e) => onUpdate({ description: e.target.value })}
-        placeholder="Description..."
-        className="h-8 w-full min-w-0 rounded border border-input bg-transparent px-2 py-1 text-sm outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] transition-[color,box-shadow]"
-      />
-      <NumberInput
-        value={item.quantity}
-        onChange={(v) => onUpdate({ quantity: v })}
-        className="w-full"
-        min={0}
-      />
-      <UnitSelect
-        value={item.unit || "hr"}
-        options={["hr", "lot", "ea"]}
-        onChange={(v) => onUpdate({ unit: v })}
-      />
-      <NumberInput
-        value={item.unitPrice || (sectionType === "designFee" || sectionType === "supervision" ? 195 : 0)}
-        onChange={(v) => onUpdate({ unitPrice: v })}
-        className="w-full"
-        isCurrency
-      />
-      <div className="text-sm text-right font-medium text-forest tabular-nums pr-1">
-        {formatCurrency(lineTotal)}
-      </div>
-      <Button
-        variant="ghost"
-        size="icon-xs"
-        onClick={onRemove}
-        className="text-stone hover:text-destructive hover:bg-destructive/10"
-      >
-        <Trash2 className="size-3.5" />
-      </Button>
+      {subItemsPanel}
     </div>
   );
 }

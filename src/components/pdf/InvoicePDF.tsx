@@ -57,7 +57,7 @@ Font.registerHyphenationCallback((word) => [word]);
 interface InvoicePDFProps {
   invoice: Invoice;
   company: CompanyInfo;
-  estimateNumber: string;
+  estimateNumber?: string;
 }
 
 const s = StyleSheet.create({
@@ -293,6 +293,49 @@ const s = StyleSheet.create({
     lineHeight: 1.6,
     fontStyle: "italic",
   },
+  // Simple line items (standalone invoices)
+  simpleTableHeader: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: colors.sageGreen,
+    paddingBottom: 4,
+    marginBottom: 4,
+  },
+  simpleTableHeaderDesc: {
+    flex: 1,
+    fontFamily: "Cormorant Garamond",
+    fontSize: 9,
+    fontWeight: "bold",
+    color: colors.sageGreen,
+    letterSpacing: 1,
+  },
+  simpleTableHeaderAmt: {
+    width: 90,
+    fontFamily: "Cormorant Garamond",
+    fontSize: 9,
+    fontWeight: "bold",
+    color: colors.sageGreen,
+    letterSpacing: 1,
+    textAlign: "right",
+  },
+  simpleTableRow: {
+    flexDirection: "row",
+    paddingVertical: 3,
+    borderBottomWidth: 0.5,
+    borderBottomColor: colors.warmStone,
+  },
+  simpleTableDesc: {
+    flex: 1,
+    fontSize: 10,
+    color: colors.deepForest,
+  },
+  simpleTableAmt: {
+    width: 90,
+    fontSize: 10,
+    fontWeight: 600,
+    color: colors.deepForest,
+    textAlign: "right",
+  },
 });
 
 const PAYMENT_METHOD_LABELS: Record<string, string> = {
@@ -304,15 +347,57 @@ const PAYMENT_METHOD_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+function PDFSimpleLineItems({ invoice }: { invoice: Invoice }) {
+  return (
+    <View style={{ marginTop: 12 }}>
+      <View style={s.sectionHeaderContainer}>
+        <Text style={s.sectionHeaderText}>LINE ITEMS</Text>
+        <View style={s.sectionLeaderDots} />
+      </View>
+      <View style={s.simpleTableHeader}>
+        <Text style={s.simpleTableHeaderDesc}>DESCRIPTION</Text>
+        <Text style={s.simpleTableHeaderAmt}>AMOUNT</Text>
+      </View>
+      {invoice.standaloneItems.map((item) => (
+        <View key={item.id}>
+          <View style={s.simpleTableRow}>
+            <Text style={s.simpleTableDesc}>{item.description}</Text>
+            <Text style={s.simpleTableAmt}>{formatCurrency(item.amount)}</Text>
+          </View>
+          {item.subItems && item.subItems.filter((si) => si.trim()).length > 0 && (
+            <View style={{ paddingLeft: 16, paddingBottom: 3 }}>
+              {item.subItems.filter((si) => si.trim()).map((sub, idx) => (
+                <Text
+                  key={idx}
+                  style={{
+                    fontSize: 8.5,
+                    color: "#A89F91",
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {"\u00B7"}  {sub.trim()}
+                </Text>
+              ))}
+            </View>
+          )}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 export function InvoicePDF({ invoice, company, estimateNumber }: InvoicePDFProps) {
-  const plantTotal = computeCategoryTotal(invoice, "plantMaterial");
-  const laborTotal = computeCategoryTotal(invoice, "laborAndServices");
-  const materialsTotal = computeCategoryTotal(invoice, "otherMaterials");
-  const designFeeTotal = computeDesignFeeTotal(invoice);
-  const taxableTotal = computeTaxableTotal(invoice);
-  const tax = computeTax(invoice);
+  const isStandalone = invoice.standaloneItems && invoice.standaloneItems.length > 0;
   const grandTotal = computeGrandTotal(invoice);
   const balanceRemaining = computeBalanceRemaining(invoice);
+
+  // Estimate-linked totals (only computed when needed)
+  const plantTotal = isStandalone ? 0 : computeCategoryTotal(invoice, "plantMaterial");
+  const laborTotal = isStandalone ? 0 : computeCategoryTotal(invoice, "laborAndServices");
+  const materialsTotal = isStandalone ? 0 : computeCategoryTotal(invoice, "otherMaterials");
+  const designFeeTotal = isStandalone ? 0 : computeDesignFeeTotal(invoice);
+  const taxableTotal = isStandalone ? 0 : computeTaxableTotal(invoice);
+  const tax = isStandalone ? 0 : computeTax(invoice);
 
   return (
     <Document
@@ -356,90 +441,114 @@ export function InvoicePDF({ invoice, company, estimateNumber }: InvoicePDFProps
           </View>
         </View>
 
-        {/* Estimate Reference */}
-        <View style={s.referenceBox}>
-          <Text style={s.referenceText}>
-            For work described in Estimate{" "}
-            <Text style={s.referenceBold}>{estimateNumber}</Text>.
-            {invoice.projectDescription ? ` ${invoice.projectDescription}` : ""}
-          </Text>
-        </View>
+        {isStandalone ? (
+          <>
+            {/* Standalone: description + simple line items */}
+            {invoice.projectDescription && (
+              <View style={s.referenceBox}>
+                <Text style={s.referenceText}>{invoice.projectDescription}</Text>
+              </View>
+            )}
+            <PDFSimpleLineItems invoice={invoice} />
+          </>
+        ) : (
+          <>
+            {/* Estimate-linked: reference + full line items */}
+            <View style={s.referenceBox}>
+              <Text style={s.referenceText}>
+                For work described in Estimate{" "}
+                <Text style={s.referenceBold}>{estimateNumber}</Text>.
+                {invoice.projectDescription ? ` ${invoice.projectDescription}` : ""}
+              </Text>
+            </View>
 
-        {/* Line Items by Section */}
-        {invoice.projectSections.map((section) => (
-          <PDFProjectSection
-            key={section.id}
-            sectionName={section.name}
-            plantMaterial={section.plantMaterial}
-            laborAndServices={section.laborAndServices}
-            otherMaterials={section.otherMaterials}
-            sectionTotal={computeProjectSectionSubtotal(section)}
-          />
-        ))}
+            {invoice.projectSections.map((section) => (
+              <PDFProjectSection
+                key={section.id}
+                sectionName={section.name}
+                plantMaterial={section.plantMaterial}
+                laborAndServices={section.laborAndServices}
+                otherMaterials={section.otherMaterials}
+                sectionTotal={computeProjectSectionSubtotal(section)}
+              />
+            ))}
 
-        {/* Design Fee */}
-        <PDFDesignFeeSection items={invoice.designFee} />
+            <PDFDesignFeeSection items={invoice.designFee} />
+          </>
+        )}
 
         {/* Cost Summary */}
         <View wrap={false} style={s.summaryBox}>
           <Text style={s.summaryTitle}>INVOICE SUMMARY</Text>
 
-          {/* Per-section subtotals */}
-          {invoice.projectSections.map((section) => {
-            const sectionTotal = computeProjectSectionSubtotal(section);
-            if (sectionTotal === 0) return null;
-            return (
-              <View key={section.id} style={s.summaryRow}>
-                <Text style={s.summaryLabel}>{section.name}</Text>
-                <Text style={s.summaryValue}>{formatCurrency(sectionTotal)}</Text>
+          {isStandalone ? (
+            <>
+              {/* Standalone: just show each item and total */}
+              {invoice.standaloneItems.map((item) => (
+                <View key={item.id} style={s.summaryRow}>
+                  <Text style={s.summaryLabel}>{item.description}</Text>
+                  <Text style={s.summaryValue}>{formatCurrency(item.amount)}</Text>
+                </View>
+              ))}
+            </>
+          ) : (
+            <>
+              {/* Estimate-linked: full category breakdown */}
+              {invoice.projectSections.map((section) => {
+                const sectionTotal = computeProjectSectionSubtotal(section);
+                if (sectionTotal === 0) return null;
+                return (
+                  <View key={section.id} style={s.summaryRow}>
+                    <Text style={s.summaryLabel}>{section.name}</Text>
+                    <Text style={s.summaryValue}>{formatCurrency(sectionTotal)}</Text>
+                  </View>
+                );
+              })}
+
+              {designFeeTotal > 0 && (
+                <View style={s.summaryRow}>
+                  <Text style={s.summaryLabel}>Design Fee</Text>
+                  <Text style={s.summaryValue}>{formatCurrency(designFeeTotal)}</Text>
+                </View>
+              )}
+
+              <View style={s.summaryDivider} />
+
+              {plantTotal > 0 && (
+                <View style={s.summaryRow}>
+                  <Text style={s.summaryLabel}>Plant Material Subtotal</Text>
+                  <Text style={s.summaryValue}>{formatCurrency(plantTotal)}</Text>
+                </View>
+              )}
+              {laborTotal > 0 && (
+                <View style={s.summaryRow}>
+                  <Text style={s.summaryLabel}>Labor & Services Subtotal</Text>
+                  <Text style={s.summaryValue}>{formatCurrency(laborTotal)}</Text>
+                </View>
+              )}
+              {materialsTotal > 0 && (
+                <View style={s.summaryRow}>
+                  <Text style={s.summaryLabel}>Other Materials Subtotal</Text>
+                  <Text style={s.summaryValue}>{formatCurrency(materialsTotal)}</Text>
+                </View>
+              )}
+
+              <View style={s.summaryDivider} />
+
+              {taxableTotal > 0 && (
+                <View style={s.summaryRow}>
+                  <Text style={s.summaryLabel}>Taxable Materials Subtotal</Text>
+                  <Text style={s.summaryValue}>{formatCurrency(taxableTotal)}</Text>
+                </View>
+              )}
+              <View style={s.summaryRow}>
+                <Text style={s.summaryLabel}>
+                  Tax on Materials ({invoice.taxRate}%)
+                </Text>
+                <Text style={s.summaryValue}>{formatCurrency(tax)}</Text>
               </View>
-            );
-          })}
-
-          {designFeeTotal > 0 && (
-            <View style={s.summaryRow}>
-              <Text style={s.summaryLabel}>Design Fee</Text>
-              <Text style={s.summaryValue}>{formatCurrency(designFeeTotal)}</Text>
-            </View>
+            </>
           )}
-
-          <View style={s.summaryDivider} />
-
-          {/* Category subtotals */}
-          {plantTotal > 0 && (
-            <View style={s.summaryRow}>
-              <Text style={s.summaryLabel}>Plant Material Subtotal</Text>
-              <Text style={s.summaryValue}>{formatCurrency(plantTotal)}</Text>
-            </View>
-          )}
-          {laborTotal > 0 && (
-            <View style={s.summaryRow}>
-              <Text style={s.summaryLabel}>Labor & Services Subtotal</Text>
-              <Text style={s.summaryValue}>{formatCurrency(laborTotal)}</Text>
-            </View>
-          )}
-          {materialsTotal > 0 && (
-            <View style={s.summaryRow}>
-              <Text style={s.summaryLabel}>Other Materials Subtotal</Text>
-              <Text style={s.summaryValue}>{formatCurrency(materialsTotal)}</Text>
-            </View>
-          )}
-
-          <View style={s.summaryDivider} />
-
-          {/* Tax */}
-          {taxableTotal > 0 && (
-            <View style={s.summaryRow}>
-              <Text style={s.summaryLabel}>Taxable Materials Subtotal</Text>
-              <Text style={s.summaryValue}>{formatCurrency(taxableTotal)}</Text>
-            </View>
-          )}
-          <View style={s.summaryRow}>
-            <Text style={s.summaryLabel}>
-              Tax on Materials ({invoice.taxRate}%)
-            </Text>
-            <Text style={s.summaryValue}>{formatCurrency(tax)}</Text>
-          </View>
 
           {/* Grand total */}
           <View style={s.grandTotalRow}>

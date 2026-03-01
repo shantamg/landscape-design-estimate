@@ -4,13 +4,16 @@ import type {
   Estimate,
   LineItemCategory,
   Invoice,
+  SimpleLineItem,
 } from "@/types";
 
 /** Subset of Estimate/Invoice fields needed for price computation */
 export type PriceableDocument = Pick<
   Estimate,
   "projectSections" | "designFee" | "taxRate" | "taxableCategories"
->;
+> & {
+  standaloneItems?: SimpleLineItem[];
+};
 
 // --- Line-level ---
 
@@ -109,8 +112,20 @@ export function computeTax(estimate: PriceableDocument): number {
   return Math.round(taxableTotal * (estimate.taxRate / 100) * 100) / 100;
 }
 
-/** Grand total: all items + tax */
+/** Sum of standalone line items (no tax) */
+export function computeStandaloneTotal(items: SimpleLineItem[]): number {
+  return Math.round(
+    items.reduce((sum, item) => sum + item.amount, 0) * 100
+  ) / 100;
+}
+
+/** Grand total: all items + tax (or standalone total if standalone items exist) */
 export function computeGrandTotal(estimate: PriceableDocument): number {
+  // Standalone invoices: simple sum, no tax
+  if (estimate.standaloneItems && estimate.standaloneItems.length > 0) {
+    return computeStandaloneTotal(estimate.standaloneItems);
+  }
+
   let total = 0;
 
   // Sum all project sections

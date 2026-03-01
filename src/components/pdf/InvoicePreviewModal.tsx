@@ -16,7 +16,7 @@ interface InvoicePreviewModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   invoice: Invoice;
-  estimateNumber: string;
+  estimateNumber?: string;
 }
 
 export function InvoicePreviewModal({

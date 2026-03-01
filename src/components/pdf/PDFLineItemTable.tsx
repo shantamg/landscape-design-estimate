@@ -90,28 +90,46 @@ export function PDFLineItemTable({
 
       {/* Data rows */}
       {items.map((item, index) => (
-        <View
-          key={item.id}
-          style={[
-            styles.tableRow,
-            index % 2 === 1 ? styles.tableRowAlt : {},
-          ]}
-        >
-          {columns.map((col, colIdx) => (
-            <View key={colIdx} style={{ width: col.width as string }}>
-              <Text
-                style={
-                  col.align === "right"
-                    ? styles.tableCellRight
-                    : col.align === "center"
-                    ? { ...styles.tableCell, textAlign: "center" }
-                    : styles.tableCell
-                }
-              >
-                {col.render(item)}
-              </Text>
+        <View key={item.id}>
+          <View
+            style={[
+              styles.tableRow,
+              index % 2 === 1 ? styles.tableRowAlt : {},
+            ]}
+          >
+            {columns.map((col, colIdx) => (
+              <View key={colIdx} style={{ width: col.width as string }}>
+                <Text
+                  style={
+                    col.align === "right"
+                      ? styles.tableCellRight
+                      : col.align === "center"
+                      ? { ...styles.tableCell, textAlign: "center" }
+                      : styles.tableCell
+                  }
+                >
+                  {col.render(item)}
+                </Text>
+              </View>
+            ))}
+          </View>
+          {/* Sub-items (indented bullet list) */}
+          {item.subItems && item.subItems.filter((s) => s.trim()).length > 0 && (
+            <View style={{ paddingLeft: 20, paddingBottom: 3 }}>
+              {item.subItems.filter((s) => s.trim()).map((sub, si) => (
+                <Text
+                  key={si}
+                  style={{
+                    fontSize: 8.5,
+                    color: colors.warmStone,
+                    lineHeight: 1.5,
+                  }}
+                >
+                  {"\u00B7"}  {sub.trim()}
+                </Text>
+              ))}
             </View>
-          ))}
+          )}
         </View>
       ))}
 

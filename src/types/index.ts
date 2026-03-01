@@ -42,6 +42,7 @@ export interface LineItem {
   unitPrice: number;
   total: number; // Computed: quantity * unitPrice
   noPrice?: boolean; // Description-only line (no individual price)
+  subItems?: string[]; // Optional detail lines (one per line, no price)
 }
 
 // --- Project Section ---
@@ -188,6 +189,14 @@ export interface Contract {
   contractorSignature: string;
 }
 
+// --- Simple Line Item (standalone invoices) ---
+export interface SimpleLineItem {
+  id: string;
+  description: string;
+  amount: number;
+  subItems?: string[]; // Optional detail lines (one per line, no price)
+}
+
 // --- Invoice Types ---
 export type InvoiceStatus = "unpaid" | "partial" | "paid";
 export type PaymentMethod = "check" | "venmo" | "zelle" | "credit_card" | "cash" | "other";
@@ -221,4 +230,7 @@ export interface Invoice {
   payments: Payment[];
   paymentInstructions: string;
   notes: string;
+
+  // Standalone invoice (no linked estimate)
+  standaloneItems: SimpleLineItem[];
 }
