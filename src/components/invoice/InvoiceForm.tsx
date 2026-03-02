@@ -178,7 +178,7 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
 
     // Standalone mode
     if (!standaloneClient.name.trim()) return null;
-    const validItems = standaloneItems.filter((item) => item.description.trim() && item.amount > 0);
+    const validItems = standaloneItems.filter((item) => item.description.trim());
     if (validItems.length === 0) return null;
 
     return {
@@ -244,7 +244,7 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
     toast.success("Invoice saved successfully.");
   };
 
-  const canPreview = mode === "estimate" ? !!selectedEstimate : !!(standaloneClient.name.trim() && standaloneItems.some((i) => i.description.trim() && i.amount > 0));
+  const canPreview = mode === "estimate" ? !!selectedEstimate : !!(standaloneClient.name.trim() && standaloneItems.some((i) => i.description.trim()));
 
   const handlePreview = () => {
     if (!canPreview) {
@@ -290,7 +290,7 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
   const invoice = buildInvoice();
   const grandTotal = mode === "estimate"
     ? (selectedEstimate ? computeGrandTotal(selectedEstimate) : 0)
-    : computeStandaloneTotal(standaloneItems.filter((i) => i.description.trim() && i.amount > 0));
+    : computeStandaloneTotal(standaloneItems.filter((i) => i.description.trim()));
   const amountPaid = invoice ? computeAmountPaid(invoice) : 0;
   const balanceRemaining = invoice ? computeBalanceRemaining(invoice) : grandTotal;
 
@@ -499,11 +499,14 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
                       <div className="space-y-1">
                         <Label className="text-xs text-muted-foreground">Amount</Label>
                         <Input
-                          type="number"
-                          min={0}
-                          step={0.01}
+                          type="text"
+                          inputMode="decimal"
                           value={item.amount || ""}
-                          onChange={(e) => updateStandaloneItem(item.id, { amount: parseFloat(e.target.value) || 0 })}
+                          onChange={(e) => {
+                            const cleaned = e.target.value.replace(/[^0-9.]/g, "");
+                            updateStandaloneItem(item.id, { amount: parseFloat(cleaned) || 0 });
+                          }}
+                          placeholder="0.00"
                         />
                       </div>
                       <Button
