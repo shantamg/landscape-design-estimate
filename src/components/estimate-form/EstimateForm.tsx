@@ -30,6 +30,7 @@ export function EstimateForm() {
             key={section.id}
             section={section}
             canDelete={estimate.projectSections.length > 1}
+            showHeader={estimate.projectSections.length > 1}
           />
         ))}
 

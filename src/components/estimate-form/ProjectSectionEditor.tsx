@@ -9,11 +9,13 @@ import type { ProjectSection, LineItem } from "@/types";
 interface ProjectSectionEditorProps {
   section: ProjectSection;
   canDelete: boolean;
+  showHeader?: boolean;
 }
 
 export function ProjectSectionEditor({
   section,
   canDelete,
+  showHeader = true,
 }: ProjectSectionEditorProps) {
   const { dispatch } = useEstimate();
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -67,78 +69,80 @@ export function ProjectSectionEditor({
 
   return (
     <div className="rounded-lg border border-border bg-card overflow-hidden">
-      {/* Section Header */}
-      <div className="flex items-center gap-2 px-5 py-3.5 bg-sage/8 border-b border-sage/15">
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          className="shrink-0 text-sage-dark hover:bg-sage/15"
-        >
-          {isCollapsed ? (
-            <ChevronDown className="size-4" />
-          ) : (
-            <ChevronUp className="size-4" />
-          )}
-        </Button>
-
-        {isEditingName ? (
-          <div className="flex items-center gap-2 flex-1">
-            <input
-              type="text"
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") handleSaveName();
-                if (e.key === "Escape") {
-                  setEditName(section.name);
-                  setIsEditingName(false);
-                }
-              }}
-              autoFocus
-              className="h-7 px-2 rounded border border-sage/30 bg-background text-sm font-heading font-bold text-forest outline-none focus-visible:border-sage focus-visible:ring-sage/30 focus-visible:ring-[3px]"
-            />
-            <Button variant="ghost" size="icon-xs" onClick={handleSaveName} className="text-sage hover:bg-sage/15">
-              <Check className="size-3.5" />
-            </Button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setEditName(section.name);
-              setIsEditingName(true);
-            }}
-            className="flex items-center gap-1.5 group cursor-pointer"
+      {/* Section Header — only shown when there are multiple sections */}
+      {showHeader && (
+        <div className="flex items-center gap-2 px-5 py-3.5 bg-sage/8 border-b border-sage/15">
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="shrink-0 text-sage-dark hover:bg-sage/15"
           >
-            <h3 className="text-base font-heading font-bold text-forest tracking-wide">
-              {section.name}
-            </h3>
-            <Pencil className="size-3 text-stone opacity-0 group-hover:opacity-100 transition-opacity" />
-          </button>
-        )}
+            {isCollapsed ? (
+              <ChevronDown className="size-4" />
+            ) : (
+              <ChevronUp className="size-4" />
+            )}
+          </Button>
 
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-sm font-semibold text-forest tabular-nums">
-            {formatCurrency(sectionTotal)}
-          </span>
-          {canDelete && (
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() =>
-                dispatch({
-                  type: "REMOVE_PROJECT_SECTION",
-                  sectionId: section.id,
-                })
-              }
-              className="text-stone hover:text-destructive hover:bg-destructive/10"
+          {isEditingName ? (
+            <div className="flex items-center gap-2 flex-1">
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") handleSaveName();
+                  if (e.key === "Escape") {
+                    setEditName(section.name);
+                    setIsEditingName(false);
+                  }
+                }}
+                autoFocus
+                className="h-7 px-2 rounded border border-sage/30 bg-background text-sm font-heading font-bold text-forest outline-none focus-visible:border-sage focus-visible:ring-sage/30 focus-visible:ring-[3px]"
+              />
+              <Button variant="ghost" size="icon-xs" onClick={handleSaveName} className="text-sage hover:bg-sage/15">
+                <Check className="size-3.5" />
+              </Button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setEditName(section.name);
+                setIsEditingName(true);
+              }}
+              className="flex items-center gap-1.5 group cursor-pointer"
             >
-              <Trash2 className="size-3.5" />
-            </Button>
+              <h3 className="text-base font-heading font-bold text-forest tracking-wide">
+                {section.name}
+              </h3>
+              <Pencil className="size-3 text-stone opacity-0 group-hover:opacity-100 transition-opacity" />
+            </button>
           )}
+
+          <div className="ml-auto flex items-center gap-3">
+            <span className="text-sm font-semibold text-forest tabular-nums">
+              {formatCurrency(sectionTotal)}
+            </span>
+            {canDelete && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() =>
+                  dispatch({
+                    type: "REMOVE_PROJECT_SECTION",
+                    sectionId: section.id,
+                  })
+                }
+                className="text-stone hover:text-destructive hover:bg-destructive/10"
+              >
+                <Trash2 className="size-3.5" />
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Section Body */}
       {!isCollapsed && (
