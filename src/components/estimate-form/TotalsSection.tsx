@@ -9,6 +9,7 @@ import {
   computeSubtotal,
   computeGrandTotal,
   computeProjectSectionSubtotal,
+  computeSectionSubtotal,
 } from "@/lib/estimate-utils";
 
 export function TotalsSection() {
@@ -23,6 +24,8 @@ export function TotalsSection() {
   const subtotal = computeSubtotal(estimate);
   const grandTotal = computeGrandTotal(estimate);
 
+  const hasMultipleSections = estimate.projectSections.length > 1;
+
   return (
     <div className="rounded-lg border-2 border-sage/30 bg-card p-6">
       <h3 className="text-xs font-semibold text-sage uppercase tracking-widest mb-5">
@@ -30,47 +33,83 @@ export function TotalsSection() {
       </h3>
 
       <div className="space-y-3 max-w-md ml-auto">
-        {/* Per-section subtotals */}
-        {estimate.projectSections.map((section) => {
-          const sectionTotal = computeProjectSectionSubtotal(section);
-          if (sectionTotal === 0) return null;
-          return (
-            <div
-              key={section.id}
-              className="flex justify-between text-sm"
-            >
-              <span className="text-muted-foreground">{section.name}</span>
-              <span className="tabular-nums">{formatCurrency(sectionTotal)}</span>
-            </div>
-          );
-        })}
+        {hasMultipleSections ? (
+          <>
+            {/* Multi-section: per-section breakdown with categories */}
+            {estimate.projectSections.map((section) => {
+              const sectionPlant = computeSectionSubtotal(section.plantMaterial);
+              const sectionLabor = computeSectionSubtotal(section.laborAndServices);
+              const sectionMaterials = computeSectionSubtotal(section.otherMaterials);
+              const sectionTotal = computeProjectSectionSubtotal(section);
+              if (sectionTotal === 0) return null;
+              return (
+                <div key={section.id} className="mb-2">
+                  <div className="flex justify-between text-sm font-semibold">
+                    <span>{section.name}</span>
+                    <span className="tabular-nums">{formatCurrency(sectionTotal)}</span>
+                  </div>
+                  {sectionPlant > 0 && (
+                    <div className="flex justify-between text-sm pl-3">
+                      <span className="text-muted-foreground">Plant Material</span>
+                      <span className="tabular-nums">{formatCurrency(sectionPlant)}</span>
+                    </div>
+                  )}
+                  {sectionLabor > 0 && (
+                    <div className="flex justify-between text-sm pl-3">
+                      <span className="text-muted-foreground">Labor & Services</span>
+                      <span className="tabular-nums">{formatCurrency(sectionLabor)}</span>
+                    </div>
+                  )}
+                  {sectionMaterials > 0 && (
+                    <div className="flex justify-between text-sm pl-3">
+                      <span className="text-muted-foreground">Other Materials</span>
+                      <span className="tabular-nums">{formatCurrency(sectionMaterials)}</span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
 
-        {estimate.projectSections.length > 1 && (
-          <div className="border-t border-border pt-2" />
+            {designFeeTotal > 0 && (
+              <div className="flex justify-between text-sm font-semibold">
+                <span>Design Fee</span>
+                <span className="tabular-nums">{formatCurrency(designFeeTotal)}</span>
+              </div>
+            )}
+
+            <div className="border-t border-border pt-2" />
+          </>
+        ) : (
+          <>
+            {/* Single-section: flat category list */}
+            {plantTotal > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Plant Material</span>
+                <span className="tabular-nums">{formatCurrency(plantTotal)}</span>
+              </div>
+            )}
+            {laborTotal > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Labor & Services</span>
+                <span className="tabular-nums">{formatCurrency(laborTotal)}</span>
+              </div>
+            )}
+            {materialsTotal > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Other Materials</span>
+                <span className="tabular-nums">{formatCurrency(materialsTotal)}</span>
+              </div>
+            )}
+            {designFeeTotal > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Design Fee</span>
+                <span className="tabular-nums">{formatCurrency(designFeeTotal)}</span>
+              </div>
+            )}
+          </>
         )}
 
-        {/* Category breakdowns */}
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Plant Material</span>
-          <span className="tabular-nums">{formatCurrency(plantTotal)}</span>
-        </div>
-        <div className="flex justify-between text-sm">
-          <span className="text-muted-foreground">Labor & Services</span>
-          <span className="tabular-nums">{formatCurrency(laborTotal)}</span>
-        </div>
-        {materialsTotal > 0 && (
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Other Materials</span>
-            <span className="tabular-nums">{formatCurrency(materialsTotal)}</span>
-          </div>
-        )}
-        {designFeeTotal > 0 && (
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Design Fee</span>
-            <span className="tabular-nums">{formatCurrency(designFeeTotal)}</span>
-          </div>
-        )}
-
+        {/* Subtotal */}
         <div className="border-t border-border pt-2">
           <div className="flex justify-between text-sm font-semibold text-forest">
             <span>Subtotal</span>

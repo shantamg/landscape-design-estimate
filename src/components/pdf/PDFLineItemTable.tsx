@@ -150,6 +150,7 @@ interface PDFProjectSectionProps {
   laborAndServices: LineItem[];
   otherMaterials: LineItem[];
   sectionTotal: number;
+  showSectionName?: boolean;
 }
 
 export function PDFProjectSection({
@@ -157,6 +158,7 @@ export function PDFProjectSection({
   plantMaterial,
   laborAndServices,
   otherMaterials,
+  showSectionName = true,
 }: PDFProjectSectionProps) {
   const hasContent =
     plantMaterial.length > 0 ||
@@ -167,8 +169,10 @@ export function PDFProjectSection({
 
   return (
     <View style={{ marginBottom: 6 }}>
-      {/* Section name header — keep with at least the first category header + a few rows */}
-      <Text style={styles.sectionHeader} minPresenceAhead={120}>{sectionName}</Text>
+      {/* Section name header — only show when there are multiple sections */}
+      {showSectionName && (
+        <Text style={styles.sectionHeader} minPresenceAhead={120}>{sectionName}</Text>
+      )}
 
       {/* Category tables in specified order: Plant, Labor, Materials */}
       <PDFLineItemTable

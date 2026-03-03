@@ -17,6 +17,7 @@ import { colors, page } from "./pdf-styles";
 import {
   formatCurrency,
   formatDate,
+  computeSectionSubtotal,
   computeProjectSectionSubtotal,
   computeCategoryTotal,
   computeDesignFeeTotal,
@@ -470,6 +471,7 @@ export function InvoicePDF({ invoice, company, estimateNumber }: InvoicePDFProps
                 laborAndServices={section.laborAndServices}
                 otherMaterials={section.otherMaterials}
                 sectionTotal={computeProjectSectionSubtotal(section)}
+                showSectionName={invoice.projectSections.length > 1}
               />
             ))}
 
@@ -493,60 +495,92 @@ export function InvoicePDF({ invoice, company, estimateNumber }: InvoicePDFProps
             </>
           ) : (
             <>
-              {/* Estimate-linked: full category breakdown */}
-              {invoice.projectSections.map((section) => {
-                const sectionTotal = computeProjectSectionSubtotal(section);
-                if (sectionTotal === 0) return null;
-                return (
-                  <View key={section.id} style={s.summaryRow}>
-                    <Text style={s.summaryLabel}>{section.name}</Text>
-                    <Text style={s.summaryValue}>{formatCurrency(sectionTotal)}</Text>
-                  </View>
-                );
-              })}
-
-              {designFeeTotal > 0 && (
-                <View style={s.summaryRow}>
-                  <Text style={s.summaryLabel}>Design Fee</Text>
-                  <Text style={s.summaryValue}>{formatCurrency(designFeeTotal)}</Text>
-                </View>
+              {/* Estimate-linked: category breakdown */}
+              {invoice.projectSections.length > 1 ? (
+                <>
+                  {/* Multi-section: per-section breakdown */}
+                  {invoice.projectSections.map((section) => {
+                    const sectionPlant = computeSectionSubtotal(section.plantMaterial);
+                    const sectionLabor = computeSectionSubtotal(section.laborAndServices);
+                    const sectionMaterials = computeSectionSubtotal(section.otherMaterials);
+                    const sectionTotal = computeProjectSectionSubtotal(section);
+                    if (sectionTotal === 0) return null;
+                    return (
+                      <View key={section.id} style={{ marginBottom: 6 }}>
+                        <View style={s.summaryRow}>
+                          <Text style={{ ...s.summaryLabel, fontWeight: "bold" }}>{section.name}</Text>
+                          <Text style={{ ...s.summaryValue, fontWeight: "bold" }}>{formatCurrency(sectionTotal)}</Text>
+                        </View>
+                        {sectionPlant > 0 && (
+                          <View style={s.summaryRow}>
+                            <Text style={{ ...s.summaryLabel, paddingLeft: 12 }}>Plant Material</Text>
+                            <Text style={s.summaryValue}>{formatCurrency(sectionPlant)}</Text>
+                          </View>
+                        )}
+                        {sectionLabor > 0 && (
+                          <View style={s.summaryRow}>
+                            <Text style={{ ...s.summaryLabel, paddingLeft: 12 }}>Labor & Services</Text>
+                            <Text style={s.summaryValue}>{formatCurrency(sectionLabor)}</Text>
+                          </View>
+                        )}
+                        {sectionMaterials > 0 && (
+                          <View style={s.summaryRow}>
+                            <Text style={{ ...s.summaryLabel, paddingLeft: 12 }}>Other Materials</Text>
+                            <Text style={s.summaryValue}>{formatCurrency(sectionMaterials)}</Text>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })}
+                  {designFeeTotal > 0 && (
+                    <View style={s.summaryRow}>
+                      <Text style={{ ...s.summaryLabel, fontWeight: "bold" }}>Design Fee</Text>
+                      <Text style={{ ...s.summaryValue, fontWeight: "bold" }}>{formatCurrency(designFeeTotal)}</Text>
+                    </View>
+                  )}
+                  <View style={s.summaryDivider} />
+                </>
+              ) : (
+                <>
+                  {/* Single-section: flat category list */}
+                  {plantTotal > 0 && (
+                    <View style={s.summaryRow}>
+                      <Text style={s.summaryLabel}>Plant Material</Text>
+                      <Text style={s.summaryValue}>{formatCurrency(plantTotal)}</Text>
+                    </View>
+                  )}
+                  {laborTotal > 0 && (
+                    <View style={s.summaryRow}>
+                      <Text style={s.summaryLabel}>Labor & Services</Text>
+                      <Text style={s.summaryValue}>{formatCurrency(laborTotal)}</Text>
+                    </View>
+                  )}
+                  {materialsTotal > 0 && (
+                    <View style={s.summaryRow}>
+                      <Text style={s.summaryLabel}>Other Materials</Text>
+                      <Text style={s.summaryValue}>{formatCurrency(materialsTotal)}</Text>
+                    </View>
+                  )}
+                  {designFeeTotal > 0 && (
+                    <View style={s.summaryRow}>
+                      <Text style={s.summaryLabel}>Design Fee</Text>
+                      <Text style={s.summaryValue}>{formatCurrency(designFeeTotal)}</Text>
+                    </View>
+                  )}
+                </>
               )}
 
-              <View style={s.summaryDivider} />
-
-              {plantTotal > 0 && (
-                <View style={s.summaryRow}>
-                  <Text style={s.summaryLabel}>Plant Material Subtotal</Text>
-                  <Text style={s.summaryValue}>{formatCurrency(plantTotal)}</Text>
-                </View>
-              )}
-              {laborTotal > 0 && (
-                <View style={s.summaryRow}>
-                  <Text style={s.summaryLabel}>Labor & Services Subtotal</Text>
-                  <Text style={s.summaryValue}>{formatCurrency(laborTotal)}</Text>
-                </View>
-              )}
-              {materialsTotal > 0 && (
-                <View style={s.summaryRow}>
-                  <Text style={s.summaryLabel}>Other Materials Subtotal</Text>
-                  <Text style={s.summaryValue}>{formatCurrency(materialsTotal)}</Text>
-                </View>
-              )}
-
-              <View style={s.summaryDivider} />
-
-              {taxableTotal > 0 && (
-                <View style={s.summaryRow}>
-                  <Text style={s.summaryLabel}>Taxable Materials Subtotal</Text>
-                  <Text style={s.summaryValue}>{formatCurrency(taxableTotal)}</Text>
-                </View>
-              )}
+              {/* Subtotal + Tax */}
               <View style={s.summaryRow}>
-                <Text style={s.summaryLabel}>
-                  Tax on Materials ({invoice.taxRate}%)
-                </Text>
-                <Text style={s.summaryValue}>{formatCurrency(tax)}</Text>
+                <Text style={s.summaryLabel}>Subtotal</Text>
+                <Text style={s.summaryValue}>{formatCurrency(plantTotal + laborTotal + materialsTotal + designFeeTotal)}</Text>
               </View>
+              {tax > 0 && (
+                <View style={s.summaryRow}>
+                  <Text style={s.summaryLabel}>Tax on Materials ({invoice.taxRate}%)</Text>
+                  <Text style={s.summaryValue}>{formatCurrency(tax)}</Text>
+                </View>
+              )}
             </>
           )}
 

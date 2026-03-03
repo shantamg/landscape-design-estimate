@@ -79,6 +79,7 @@ export function EstimatePDF({ estimate, company }: EstimatePDFProps) {
             laborAndServices={section.laborAndServices}
             otherMaterials={section.otherMaterials}
             sectionTotal={computeProjectSectionSubtotal(section)}
+            showSectionName={estimate.projectSections.length > 1}
           />
         ))}
 
