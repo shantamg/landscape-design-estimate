@@ -6,7 +6,6 @@ import {
   computeProjectSectionSubtotal,
   computeCategoryTotal,
   computeDesignFeeTotal,
-  computeTaxableTotal,
   computeTax,
   computeGrandTotal,
   computeSectionSubtotal,

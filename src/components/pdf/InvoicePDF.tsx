@@ -21,7 +21,6 @@ import {
   computeProjectSectionSubtotal,
   computeCategoryTotal,
   computeDesignFeeTotal,
-  computeTaxableTotal,
   computeTax,
   computeGrandTotal,
   computeBalanceRemaining,
@@ -397,7 +396,6 @@ export function InvoicePDF({ invoice, company, estimateNumber }: InvoicePDFProps
   const laborTotal = isStandalone ? 0 : computeCategoryTotal(invoice, "laborAndServices");
   const materialsTotal = isStandalone ? 0 : computeCategoryTotal(invoice, "otherMaterials");
   const designFeeTotal = isStandalone ? 0 : computeDesignFeeTotal(invoice);
-  const taxableTotal = isStandalone ? 0 : computeTaxableTotal(invoice);
   const tax = isStandalone ? 0 : computeTax(invoice);
 
   return (
