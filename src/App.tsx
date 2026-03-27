@@ -31,16 +31,30 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { pushAllToCloud, getSyncStatus, onSyncStatusChange } from "@/lib/sync";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { Cloud, CloudOff, Loader2, CheckCircle2 } from "lucide-react";
+import { Cloud, CloudOff, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
 
 function App() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, supabaseUnavailable } = useAuth();
 
   if (!isAuthenticated) {
     return <LoginPage />;
   }
 
-  return <AppContent />;
+  return (
+    <>
+      {supabaseUnavailable && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 print:hidden">
+          <div className="mx-auto max-w-6xl flex items-center gap-2 text-sm text-amber-800">
+            <AlertTriangle className="h-4 w-4 shrink-0" />
+            <span>
+              Cloud backup is currently unavailable — your work is saved locally but not being backed up.
+            </span>
+          </div>
+        </div>
+      )}
+      <AppContent />
+    </>
+  );
 }
 
 function AppContent() {
