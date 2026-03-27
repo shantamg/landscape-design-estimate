@@ -23,10 +23,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Check for existing session
-    getSession().then((s) => {
-      setSession(s);
-      setLoading(false);
-    });
+    getSession()
+      .then((s) => {
+        setSession(s);
+        setLoading(false);
+      })
+      .catch(() => {
+        // Supabase unavailable — fall through to local-only mode
+        setLoading(false);
+      });
 
     // Listen for auth state changes (magic link callback, sign out, etc.)
     const { unsubscribe } = onAuthStateChange((s) => {
