@@ -66,6 +66,7 @@ function AppContent() {
   // Pre-selected estimate ID for contract/invoice creation
   const [contractEstimateId, setContractEstimateId] = useState<string>("");
   const [invoiceEstimateId, setInvoiceEstimateId] = useState<string>("");
+  const [editInvoiceId, setEditInvoiceId] = useState<string>("");
   const [invoiceView, setInvoiceView] = useState<"form" | "list">("form");
   const [syncStatus, setSyncStatus] = useState(getSyncStatus());
 
@@ -146,6 +147,7 @@ function AppContent() {
   }, []);
 
   const handleCreateInvoice = useCallback((estimateId: string) => {
+    setEditInvoiceId("");
     setInvoiceEstimateId(estimateId);
     setInvoiceView("form");
     setActiveTab("invoices");
@@ -222,14 +224,18 @@ function AppContent() {
               <div className="space-y-4">
                 <div className="flex gap-2">
                   <button
-                    onClick={() => setInvoiceView("form")}
+                    onClick={() => {
+                      setEditInvoiceId("");
+                      setInvoiceEstimateId("");
+                      setInvoiceView("form");
+                    }}
                     className={`text-sm font-medium px-3 py-1.5 rounded-md transition-colors ${
                       invoiceView === "form"
                         ? "bg-sage text-white"
                         : "text-stone hover:bg-sage/10"
                     }`}
                   >
-                    New Invoice
+                    {editInvoiceId ? "Edit Invoice" : "New Invoice"}
                   </button>
                   <button
                     onClick={() => setInvoiceView("list")}
@@ -244,16 +250,24 @@ function AppContent() {
                 </div>
                 {invoiceView === "form" ? (
                   <div className="rounded-lg border border-border bg-card p-6">
-                    <InvoiceForm preSelectedEstimateId={invoiceEstimateId} />
+                    <InvoiceForm
+                      key={editInvoiceId || "new"}
+                      preSelectedEstimateId={invoiceEstimateId}
+                      editInvoiceId={editInvoiceId}
+                    />
                   </div>
                 ) : (
                   <InvoiceList
                     onOpenInvoice={(id) => {
-                      // For now, switch to list view to see invoices
-                      // Future: load invoice into form for editing
-                      toast.info(`Invoice ${id} — editing coming soon`);
+                      setEditInvoiceId(id);
+                      setInvoiceEstimateId("");
+                      setInvoiceView("form");
                     }}
-                    onNewInvoice={() => setInvoiceView("form")}
+                    onNewInvoice={() => {
+                      setEditInvoiceId("");
+                      setInvoiceEstimateId("");
+                      setInvoiceView("form");
+                    }}
                   />
                 )}
               </div>

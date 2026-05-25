@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import {
   listEstimates,
   loadEstimate,
+  loadInvoice,
   loadSettings,
   saveInvoice,
   getNextInvoiceNumber,
@@ -60,33 +61,56 @@ const EMPTY_CLIENT: ClientInfo = {
 
 interface InvoiceFormProps {
   preSelectedEstimateId?: string;
+  editInvoiceId?: string;
 }
 
-export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
-  const [mode, setMode] = useState<InvoiceMode>(preSelectedEstimateId ? "estimate" : "estimate");
+export function InvoiceForm({ preSelectedEstimateId, editInvoiceId }: InvoiceFormProps) {
+  // Load the existing invoice once (component is remounted via `key` when this changes)
+  const [editInvoice] = useState<Invoice | null>(() =>
+    editInvoiceId ? loadInvoice(editInvoiceId) : null
+  );
+  const isEditing = !!editInvoice;
+
+  const [mode, setMode] = useState<InvoiceMode>(
+    editInvoice ? (editInvoice.estimateId ? "estimate" : "standalone") : "estimate"
+  );
   const [estimates, setEstimates] = useState<Estimate[]>([]);
-  const [selectedEstimateId, setSelectedEstimateId] = useState<string>(preSelectedEstimateId || "");
+  const [selectedEstimateId, setSelectedEstimateId] = useState<string>(
+    editInvoice?.estimateId || preSelectedEstimateId || ""
+  );
   const [selectedEstimate, setSelectedEstimate] = useState<Estimate | null>(null);
 
   // Standalone fields
-  const [standaloneClient, setStandaloneClient] = useState<ClientInfo>({ ...EMPTY_CLIENT });
-  const [standaloneDescription, setStandaloneDescription] = useState("");
-  const [standaloneItems, setStandaloneItems] = useState<SimpleLineItem[]>([
-    { id: uuidv4(), description: "", amount: 0 },
-  ]);
+  const [standaloneClient, setStandaloneClient] = useState<ClientInfo>(
+    editInvoice && !editInvoice.estimateId
+      ? { ...EMPTY_CLIENT, ...editInvoice.client }
+      : { ...EMPTY_CLIENT }
+  );
+  const [standaloneDescription, setStandaloneDescription] = useState(
+    editInvoice && !editInvoice.estimateId ? editInvoice.projectDescription : ""
+  );
+  const [standaloneItems, setStandaloneItems] = useState<SimpleLineItem[]>(
+    editInvoice && !editInvoice.estimateId && editInvoice.standaloneItems.length > 0
+      ? editInvoice.standaloneItems.map((i) => ({ ...i }))
+      : [{ id: uuidv4(), description: "", amount: 0 }]
+  );
 
   const settings = loadSettings();
-  const [invoiceId] = useState(() => uuidv4());
-  const [invoiceNumber] = useState(() => {
-    const num = getNextInvoiceNumber();
-    return num;
-  });
-  const [invoiceDate, setInvoiceDate] = useState(() => new Date().toISOString().split("T")[0]);
-  const [paymentInstructions, setPaymentInstructions] = useState(settings.defaults.invoicePaymentInstructions);
-  const [notes, setNotes] = useState("");
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [invoiceId] = useState(() => editInvoice?.id ?? uuidv4());
+  const [invoiceNumber] = useState(() => editInvoice?.invoiceNumber ?? getNextInvoiceNumber());
+  const [invoiceDate, setInvoiceDate] = useState(
+    () => editInvoice?.invoiceDate ?? new Date().toISOString().split("T")[0]
+  );
+  const [paymentInstructions, setPaymentInstructions] = useState(
+    editInvoice?.paymentInstructions ?? settings.defaults.invoicePaymentInstructions
+  );
+  const [notes, setNotes] = useState(editInvoice?.notes ?? "");
+  const [payments, setPayments] = useState<Payment[]>(
+    editInvoice ? editInvoice.payments.map((p) => ({ ...p })) : []
+  );
   const [showPreview, setShowPreview] = useState(false);
-  const [hasIncremented, setHasIncremented] = useState(false);
+  // Existing invoices already have a number; don't consume a new one on save.
+  const [hasIncremented, setHasIncremented] = useState(isEditing);
 
   // Load estimates on mount
   useEffect(() => {
@@ -160,7 +184,7 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
         estimateId: selectedEstimate.id,
         invoiceNumber,
         status: "unpaid",
-        createdAt: new Date().toISOString(),
+        createdAt: editInvoice?.createdAt ?? new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         client: { ...selectedEstimate.client },
         projectDescription: selectedEstimate.projectDescription,
@@ -186,7 +210,7 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
       estimateId: "",
       invoiceNumber,
       status: "unpaid",
-      createdAt: new Date().toISOString(),
+      createdAt: editInvoice?.createdAt ?? new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       client: { ...standaloneClient },
       projectDescription: standaloneDescription,
@@ -212,6 +236,7 @@ export function InvoiceForm({ preSelectedEstimateId }: InvoiceFormProps) {
     payments,
     paymentInstructions,
     notes,
+    editInvoice,
   ]);
 
   const handleSave = () => {
