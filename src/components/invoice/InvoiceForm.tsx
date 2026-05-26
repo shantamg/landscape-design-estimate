@@ -177,7 +177,23 @@ export function InvoiceForm({ preSelectedEstimateId, editInvoiceId }: InvoiceFor
 
   const buildInvoice = useCallback((): Invoice | null => {
     if (mode === "estimate") {
-      if (!selectedEstimate) return null;
+      // Editing a saved estimate-linked invoice: use its own stored snapshot so
+      // recording a payment never depends on the source estimate still being
+      // present in this browser. Only re-derive from a live estimate when one
+      // is actually selected (new invoice, or deliberately relinking).
+      if (!selectedEstimate) {
+        if (editInvoice && editInvoice.estimateId) {
+          return {
+            ...editInvoice,
+            updatedAt: new Date().toISOString(),
+            invoiceDate,
+            payments,
+            paymentInstructions,
+            notes,
+          };
+        }
+        return null;
+      }
 
       return {
         id: invoiceId,
@@ -269,7 +285,7 @@ export function InvoiceForm({ preSelectedEstimateId, editInvoiceId }: InvoiceFor
     toast.success("Invoice saved successfully.");
   };
 
-  const canPreview = mode === "estimate" ? !!selectedEstimate : !!(standaloneClient.name.trim() && standaloneItems.some((i) => i.description.trim()));
+  const canPreview = mode === "estimate" ? (!!selectedEstimate || !!editInvoice?.estimateId) : !!(standaloneClient.name.trim() && standaloneItems.some((i) => i.description.trim()));
 
   const handlePreview = () => {
     if (!canPreview) {
@@ -314,7 +330,7 @@ export function InvoiceForm({ preSelectedEstimateId, editInvoiceId }: InvoiceFor
 
   const invoice = buildInvoice();
   const grandTotal = mode === "estimate"
-    ? (selectedEstimate ? computeGrandTotal(selectedEstimate) : 0)
+    ? (selectedEstimate ? computeGrandTotal(selectedEstimate) : (editInvoice ? computeGrandTotal(editInvoice) : 0))
     : computeStandaloneTotal(standaloneItems.filter((i) => i.description.trim()));
   const amountPaid = invoice ? computeAmountPaid(invoice) : 0;
   const balanceRemaining = invoice ? computeBalanceRemaining(invoice) : grandTotal;
@@ -699,7 +715,7 @@ export function InvoiceForm({ preSelectedEstimateId, editInvoiceId }: InvoiceFor
         )}
 
         {/* Payment Summary */}
-        {(mode === "estimate" ? selectedEstimate : canPreview) && (
+        {(mode === "estimate" ? (selectedEstimate || editInvoice?.estimateId) : canPreview) && (
           <div className="border-t border-border/60 pt-3 space-y-1 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Invoice Total:</span>

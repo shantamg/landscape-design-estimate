@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useCallback, useEffect } from "rea
 import type { Session } from "@supabase/supabase-js";
 import { getSession, signOut, onAuthStateChange } from "@/lib/auth";
 import { isSupabaseConfigured } from "@/lib/supabase";
+import { pullFromCloud } from "@/lib/sync";
+import { applyCloudData } from "@/lib/storage";
 
 interface AuthContextValue {
   isAuthenticated: boolean;
@@ -24,12 +26,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Pull cloud data into local storage once per signed-in user, so saved
+    // estimates/invoices (and recorded payments) appear on any device. Without
+    // this the app only ever pushes local data up and never reads it back.
+    let pulledUserId: string | null = null;
+    async function adoptSession(s: Session | null) {
+      const userId = s?.user?.id ?? null;
+      if (userId && userId !== pulledUserId) {
+        pulledUserId = userId;
+        try {
+          const cloud = await pullFromCloud();
+          if (cloud) applyCloudData(cloud);
+        } catch (err) {
+          console.error("[auth] cloud pull failed:", err);
+        }
+      }
+      setSession(s);
+      setLoading(false);
+    }
+
     // Check for existing session
     getSession()
-      .then((s) => {
-        setSession(s);
-        setLoading(false);
-      })
+      .then(adoptSession)
       .catch(() => {
         // Supabase unavailable — fall through to local-only mode
         setSupabaseUnavailable(true);
@@ -38,8 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // Listen for auth state changes (magic link callback, sign out, etc.)
     const { unsubscribe } = onAuthStateChange((s) => {
-      setSession(s);
-      setLoading(false);
+      void adoptSession(s);
     });
 
     return () => unsubscribe();

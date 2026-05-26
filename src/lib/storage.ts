@@ -290,6 +290,54 @@ export function initializeCatalog(defaultCatalog: CatalogItem[]): void {
   if (loadCatalog("material").length === 0) saveCatalog("material", materials);
 }
 
+// --- Cloud Pull Merge ---
+
+/**
+ * Merge a list of cloud records into a localStorage collection by id.
+ * Newest `updatedAt` wins, so a payment recorded on another device is not
+ * clobbered by a stale local copy (and vice versa). Writes directly to
+ * localStorage to avoid re-queuing a sync push for every merged record.
+ */
+function mergeById<T extends { id: string; updatedAt?: string }>(
+  key: string,
+  cloudItems: T[]
+): void {
+  const local = getItem<T[]>(key) ?? [];
+  const map = new Map(local.map((item) => [item.id, item]));
+  for (const cloud of cloudItems) {
+    const existing = map.get(cloud.id);
+    if (!existing || (cloud.updatedAt ?? "") >= (existing.updatedAt ?? "")) {
+      map.set(cloud.id, cloud);
+    }
+  }
+  setItem(key, Array.from(map.values()));
+}
+
+/**
+ * Apply data pulled from the cloud into local storage. Called once after
+ * sign-in so saved estimates/invoices/contracts (and the payments recorded on
+ * them) are restored on any device, not just the one they were created on.
+ */
+export function applyCloudData(cloud: {
+  estimates: Estimate[];
+  contracts: Contract[];
+  invoices: Invoice[];
+  settings: Settings | null;
+  catalogs: { plant: CatalogItem[]; service: CatalogItem[]; material: CatalogItem[] };
+}): void {
+  mergeById(KEYS.estimates, cloud.estimates);
+  mergeById(KEYS.contracts, cloud.contracts);
+  mergeById(KEYS.invoices, cloud.invoices);
+
+  // The cloud is the backup of record for company info and counters.
+  if (cloud.settings) setItem(KEYS.settings, cloud.settings);
+
+  // Catalogs are wholesale per type; prefer cloud when it has entries.
+  if (cloud.catalogs.plant.length > 0) setItem(KEYS.plantCatalog, cloud.catalogs.plant);
+  if (cloud.catalogs.service.length > 0) setItem(KEYS.serviceCatalog, cloud.catalogs.service);
+  if (cloud.catalogs.material.length > 0) setItem(KEYS.materialCatalog, cloud.catalogs.material);
+}
+
 // --- Single Estimate Import (from JSON) ---
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
