@@ -1,0 +1,6 @@
+[   19734ms] [ERROR] [vite] Error @ http://localhost:5174/@vite/client:808
+[   19734ms] [ERROR] [vite] Failed to reload /src/index.css. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5174/@vite/client:808
+[   19735ms] [ERROR] [vite] Error @ http://localhost:5174/@vite/client:808
+[   19735ms] [ERROR] [vite] Failed to reload /src/App.tsx. This could be due to syntax errors or importing non-existent modules. (see errors above) @ http://localhost:5174/@vite/client:808
+[   19736ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://localhost:5174/src/index.css?t=1772064769621”." {file: "http://localhost:5174/@vite/client" line: 0}] @ http://localhost:5174/@vite/client:0
+[   19736ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://localhost:5174/src/App.tsx?t=1772064769621”." {file: "http://localhost:5174/@vite/client" line: 0}] @ http://localhost:5174/@vite/client:0

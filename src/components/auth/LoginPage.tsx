@@ -85,6 +85,8 @@ export function LoginPage() {
             )}
           </form>
         </div>
+
+        <p className="text-center text-[10px] text-stone/50 font-mono">{__BUILD_STAMP__}</p>
       </div>
     </div>
   );

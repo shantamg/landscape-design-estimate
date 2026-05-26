@@ -177,6 +177,9 @@ function AppContent() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <span className="text-[10px] text-stone/60 font-mono" title="Build version">
+                {__BUILD_STAMP__}
+              </span>
               {isSupabaseConfigured() && (
                 <span className="text-stone" title={`Sync: ${syncStatus}`}>
                   {syncStatus === "syncing" && <Loader2 className="h-4 w-4 animate-spin" />}

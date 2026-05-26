@@ -1,0 +1,2 @@
+[     896ms] [WARNING] [JavaScript Warning: "Loading failed for the module with source “http://localhost:5173/node_modules/.vite/deps/@react-pdf_renderer.js?v=a195fba0”." {file: "http://localhost:5173/src/components/contract/ContractForm.tsx" line: 0}] @ http://localhost:5173/src/components/contract/ContractForm.tsx:0
+[     897ms] [WARNING] [JavaScript Warning: "“localhost” has been classified as a bounce tracker. If it does not receive user activation within the next 3,600 seconds it will have its state purged."] @ :0

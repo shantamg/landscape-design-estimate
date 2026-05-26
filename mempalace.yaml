@@ -1,0 +1,20 @@
+wing: landscape_design_estimate
+rooms:
+- name: research
+  description: Files from research/
+- name: planning
+  description: Files from planning/
+- name: imports
+  description: Files from imports/
+- name: supabase
+  description: Files from supabase/
+- name: public
+  description: Files from public/
+- name: design
+  description: Files from assets/
+- name: src
+  description: Files from src/
+- name: frontend
+  description: Files from components/
+- name: general
+  description: Files that don't fit other rooms

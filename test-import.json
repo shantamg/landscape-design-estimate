@@ -1,0 +1,29 @@
+{
+  "client": {
+    "name": "Jane Smith",
+    "address": "123 Oak Street",
+    "city": "Los Angeles",
+    "state": "CA",
+    "zip": "90049"
+  },
+  "projectDescription": "Complete backyard renovation including new plantings, patio extension, and irrigation system.",
+  "projectSections": [
+    {
+      "name": "Backyard",
+      "plantMaterial": [
+        { "description": "Japanese Maple (Acer palmatum) - 15 gal", "quantity": 1, "unit": "ea", "unitPrice": 250, "category": "Planting" },
+        { "description": "Lavender (Lavandula) - 1 gal", "quantity": 12, "unit": "ea", "unitPrice": 15, "category": "Planting" }
+      ],
+      "laborAndServices": [
+        { "description": "Planting labor", "quantity": 8, "unit": "hr", "unitPrice": 85, "category": "Labor" },
+        { "description": "Cleanup and haul-away", "quantity": 4, "unit": "hr", "unitPrice": 75, "category": "Labor" }
+      ],
+      "otherMaterials": [
+        { "description": "Mulch - premium bark", "quantity": 5, "unit": "cuyd", "unitPrice": 65, "category": "Other" }
+      ]
+    }
+  ],
+  "designFee": [
+    { "description": "Design Fee — Backyard renovation", "quantity": 1, "unit": "lot", "unitPrice": 3500, "category": "Other" }
+  ]
+}
