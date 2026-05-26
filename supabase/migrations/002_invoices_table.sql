@@ -4,7 +4,9 @@
 CREATE TABLE invoices (
   id UUID PRIMARY KEY,
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  estimate_id UUID REFERENCES estimates(id) ON DELETE SET NULL,
+  -- Plain UUID (no FK to estimates): invoices store their own snapshot, and a
+  -- FK here caused sync failures when an invoice was pushed before its estimate.
+  estimate_id UUID,
   invoice_number TEXT NOT NULL,
   status TEXT NOT NULL DEFAULT 'unpaid',
   data JSONB NOT NULL,
