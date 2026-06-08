@@ -11,6 +11,7 @@ import { InvoicePDF } from "./InvoicePDF";
 import { loadSettings } from "@/lib/storage";
 import type { Invoice } from "@/types";
 import { Download } from "lucide-react";
+import { toast } from "sonner";
 
 interface InvoicePreviewModalProps {
   open: boolean;
@@ -45,6 +46,11 @@ export function InvoicePreviewModal({
       a.download = `Invoice-${invoice.invoiceNumber}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("[invoice] PDF download failed:", err);
+      toast.error(
+        `Could not generate the PDF: ${err instanceof Error ? err.message : "unknown error"}`
+      );
     } finally {
       setDownloading(false);
     }

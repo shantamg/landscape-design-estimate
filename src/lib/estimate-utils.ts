@@ -24,7 +24,7 @@ export function computeLineTotal(quantity: number, unitPrice: number): number {
 // --- Section-level (within a project section) ---
 
 export function computeSectionSubtotal(items: LineItem[]): number {
-  return items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+  return (items ?? []).reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
 }
 
 // --- Project Section totals ---
@@ -33,9 +33,9 @@ export function computeProjectSectionSubtotal(
   section: ProjectSection
 ): number {
   return (
-    computeSectionSubtotal(section.plantMaterial) +
-    computeSectionSubtotal(section.laborAndServices) +
-    computeSectionSubtotal(section.otherMaterials)
+    computeSectionSubtotal(section.plantMaterial ?? []) +
+    computeSectionSubtotal(section.laborAndServices ?? []) +
+    computeSectionSubtotal(section.otherMaterials ?? [])
   );
 }
 
@@ -46,15 +46,15 @@ export function computeCategoryTotal(
   estimate: PriceableDocument,
   category: "plantMaterial" | "laborAndServices" | "otherMaterials"
 ): number {
-  return estimate.projectSections.reduce(
-    (sum, section) => sum + computeSectionSubtotal(section[category]),
+  return (estimate.projectSections ?? []).reduce(
+    (sum, section) => sum + computeSectionSubtotal(section[category] ?? []),
     0
   );
 }
 
 /** Sum of design fee line items */
 export function computeDesignFeeTotal(estimate: PriceableDocument): number {
-  return computeSectionSubtotal(estimate.designFee);
+  return computeSectionSubtotal(estimate.designFee ?? []);
 }
 
 /** Total of all taxable categories (plant material + other materials by default) */
@@ -62,18 +62,18 @@ export function computeTaxableTotal(estimate: PriceableDocument): number {
   const taxableCategories = estimate.taxableCategories;
 
   let total = 0;
-  for (const section of estimate.projectSections) {
-    for (const item of section.plantMaterial) {
+  for (const section of estimate.projectSections ?? []) {
+    for (const item of section.plantMaterial ?? []) {
       if (taxableCategories.includes(item.category)) {
         total += item.quantity * item.unitPrice;
       }
     }
-    for (const item of section.otherMaterials) {
+    for (const item of section.otherMaterials ?? []) {
       if (taxableCategories.includes(item.category)) {
         total += item.quantity * item.unitPrice;
       }
     }
-    for (const item of section.laborAndServices) {
+    for (const item of section.laborAndServices ?? []) {
       if (taxableCategories.includes(item.category)) {
         total += item.quantity * item.unitPrice;
       }
@@ -88,11 +88,11 @@ export function computeNonTaxableTotal(estimate: PriceableDocument): number {
   const taxableCategories = estimate.taxableCategories;
 
   let total = 0;
-  for (const section of estimate.projectSections) {
+  for (const section of estimate.projectSections ?? []) {
     for (const item of [
-      ...section.plantMaterial,
-      ...section.laborAndServices,
-      ...section.otherMaterials,
+      ...(section.plantMaterial ?? []),
+      ...(section.laborAndServices ?? []),
+      ...(section.otherMaterials ?? []),
     ]) {
       if (!taxableCategories.includes(item.category)) {
         total += item.quantity * item.unitPrice;
@@ -115,7 +115,7 @@ export function computeTax(estimate: PriceableDocument): number {
 /** Sum of standalone line items (no tax) */
 export function computeStandaloneTotal(items: SimpleLineItem[]): number {
   return Math.round(
-    items.reduce((sum, item) => sum + item.amount, 0) * 100
+    (items ?? []).reduce((sum, item) => sum + item.amount, 0) * 100
   ) / 100;
 }
 
@@ -129,7 +129,7 @@ export function computeGrandTotal(estimate: PriceableDocument): number {
   let total = 0;
 
   // Sum all project sections
-  for (const section of estimate.projectSections) {
+  for (const section of estimate.projectSections ?? []) {
     total += computeProjectSectionSubtotal(section);
   }
 
@@ -145,7 +145,7 @@ export function computeGrandTotal(estimate: PriceableDocument): number {
 /** Subtotal before tax (all items, no tax) */
 export function computeSubtotal(estimate: PriceableDocument): number {
   let total = 0;
-  for (const section of estimate.projectSections) {
+  for (const section of estimate.projectSections ?? []) {
     total += computeProjectSectionSubtotal(section);
   }
   total += computeDesignFeeTotal(estimate);
@@ -195,7 +195,7 @@ export function generateInvoiceNumber(
 
 /** Sum of all payments recorded on an invoice */
 export function computeAmountPaid(invoice: Invoice): number {
-  return invoice.payments.reduce((sum, p) => sum + p.amount, 0);
+  return (invoice.payments ?? []).reduce((sum, p) => sum + p.amount, 0);
 }
 
 /** Grand total minus amount paid */

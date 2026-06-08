@@ -277,12 +277,19 @@ export function InvoiceForm({ preSelectedEstimateId, editInvoiceId }: InvoiceFor
       invoice.status = "unpaid";
     }
 
-    saveInvoice(invoice);
-    if (!hasIncremented) {
-      incrementInvoiceNumber();
-      setHasIncremented(true);
+    try {
+      saveInvoice(invoice);
+      if (!hasIncremented) {
+        incrementInvoiceNumber();
+        setHasIncremented(true);
+      }
+      toast.success("Invoice saved successfully.");
+    } catch (err) {
+      console.error("[invoice] save failed:", err);
+      toast.error(
+        `Could not save the invoice: ${err instanceof Error ? err.message : "unknown error"}`
+      );
     }
-    toast.success("Invoice saved successfully.");
   };
 
   const canPreview = mode === "estimate" ? (!!selectedEstimate || !!editInvoice?.estimateId) : !!(standaloneClient.name.trim() && standaloneItems.some((i) => i.description.trim()));
@@ -311,21 +318,28 @@ export function InvoiceForm({ preSelectedEstimateId, editInvoiceId }: InvoiceFor
     const invoice = buildInvoice();
     if (!invoice) return;
 
-    const blob = await pdf(
-      <InvoicePDF
-        invoice={invoice}
-        company={settings.company}
-        estimateNumber={mode === "estimate" ? selectedEstimate?.estimateNumber : undefined}
-      />
-    ).toBlob();
+    try {
+      const blob = await pdf(
+        <InvoicePDF
+          invoice={invoice}
+          company={settings.company}
+          estimateNumber={mode === "estimate" ? selectedEstimate?.estimateNumber : undefined}
+        />
+      ).toBlob();
 
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `Invoice-${invoiceNumber}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("PDF exported.");
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Invoice-${invoiceNumber}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("PDF exported.");
+    } catch (err) {
+      console.error("[invoice] PDF export failed:", err);
+      toast.error(
+        `Could not generate the PDF: ${err instanceof Error ? err.message : "unknown error"}`
+      );
+    }
   };
 
   const invoice = buildInvoice();
