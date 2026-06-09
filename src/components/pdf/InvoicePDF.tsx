@@ -49,6 +49,12 @@ Font.register({
     { src: SourceSansRegular, fontWeight: "normal" },
     { src: SourceSansSemiBold, fontWeight: 600 },
     { src: SourceSansBold, fontWeight: "bold" },
+    // Source Sans 3 ships no italic file here; map italic requests (e.g. the
+    // invoice "notes" style) onto the matching upright face so @react-pdf can
+    // always resolve the font instead of throwing and aborting the whole PDF.
+    { src: SourceSansRegular, fontWeight: "normal", fontStyle: "italic" },
+    { src: SourceSansSemiBold, fontWeight: 600, fontStyle: "italic" },
+    { src: SourceSansBold, fontWeight: "bold", fontStyle: "italic" },
   ],
 });
 
