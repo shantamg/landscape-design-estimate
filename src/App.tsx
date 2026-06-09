@@ -31,7 +31,8 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { pushAllToCloud, getSyncStatus, onSyncStatusChange } from "@/lib/sync";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { Cloud, CloudOff, Loader2, CheckCircle2, AlertTriangle } from "lucide-react";
+import { useVersionCheck } from "@/hooks/useVersionCheck";
+import { Cloud, CloudOff, Loader2, CheckCircle2, AlertTriangle, RefreshCw } from "lucide-react";
 
 function App() {
   const { isAuthenticated, supabaseUnavailable } = useAuth();
@@ -42,6 +43,7 @@ function App() {
 
   return (
     <>
+      <UpdateBanner />
       {supabaseUnavailable && (
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2.5 print:hidden">
           <div className="mx-auto max-w-6xl flex items-center gap-2 text-sm text-amber-800">
@@ -54,6 +56,28 @@ function App() {
       )}
       <AppContent />
     </>
+  );
+}
+
+function UpdateBanner() {
+  const updateAvailable = useVersionCheck();
+  if (!updateAvailable) return null;
+
+  return (
+    <div className="bg-sage text-white px-4 py-3 print:hidden">
+      <div className="mx-auto max-w-6xl flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 text-center">
+        <span className="text-sm font-medium">
+          A newer version of the Estimate Builder is ready.
+        </span>
+        <button
+          onClick={() => window.location.reload()}
+          className="inline-flex items-center gap-1.5 rounded-md bg-white px-4 py-1.5 text-sm font-semibold text-sage-dark hover:bg-white/90 transition-colors shrink-0"
+        >
+          <RefreshCw className="h-4 w-4" />
+          Update now
+        </button>
+      </div>
+    </div>
   );
 }
 

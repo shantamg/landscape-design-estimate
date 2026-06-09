@@ -18,11 +18,28 @@ function gitShortSha(): string {
 // Build stamp shown in the app header so we can confirm which deploy is loaded.
 const buildStamp = `${gitShortSha()} · ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`
 
+// Emit a tiny version.json into the build so a running tab can poll it and
+// notice when a newer deploy is live (the in-app "Update" banner). It must
+// contain the exact same string compiled into the app via __BUILD_STAMP__.
+function emitVersionJson() {
+  return {
+    name: 'emit-version-json',
+    generateBundle() {
+      // @ts-expect-error - emitFile is provided by Rollup at build time
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        source: JSON.stringify({ build: buildStamp }),
+      })
+    },
+  }
+}
+
 export default defineConfig({
   define: {
     __BUILD_STAMP__: JSON.stringify(buildStamp),
   },
-  plugins: [react(), tailwindcss()],
+  plugins: [react(), tailwindcss(), emitVersionJson()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
