@@ -15,6 +15,26 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+// Remembers that this device successfully signed in at least once. Lets a
+// returning user keep working in local-only mode if Supabase is later
+// unreachable (e.g. a paused free-tier project), instead of being trapped at a
+// magic-link login page they can't pass while the cloud is down.
+const PRIOR_LOGIN_KEY = "nlgd_prior_login";
+
+// Hard ceiling on the initial session check. supabase-js can hang indefinitely
+// trying to refresh an expired token when the host doesn't resolve, which would
+// leave the app stuck on a blank screen. If we hit this, fall through to
+// local-only mode instead of waiting forever.
+const SESSION_TIMEOUT_MS = 4000;
+
+function hasPriorLogin(): boolean {
+  try {
+    return !!localStorage.getItem(PRIOR_LOGIN_KEY);
+  } catch {
+    return false;
+  }
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
@@ -32,6 +52,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let pulledUserId: string | null = null;
     async function adoptSession(s: Session | null) {
       const userId = s?.user?.id ?? null;
+      if (userId) {
+        // We reached Supabase and have a real session: clear any
+        // "unavailable" state and remember this device has signed in.
+        setSupabaseUnavailable(false);
+        try {
+          localStorage.setItem(PRIOR_LOGIN_KEY, s?.user?.email ?? "1");
+        } catch {
+          /* ignore storage failures */
+        }
+      }
       if (userId && userId !== pulledUserId) {
         pulledUserId = userId;
         try {
@@ -45,11 +75,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
     }
 
-    // Check for existing session
-    getSession()
-      .then(adoptSession)
+    // Check for existing session, but never block the app forever: if Supabase
+    // is unreachable the session check can hang, so race it against a timeout.
+    const sessionTimeout = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("session-check-timeout")), SESSION_TIMEOUT_MS)
+    );
+    Promise.race([getSession(), sessionTimeout])
+      .then((s) => adoptSession(s as Session | null))
       .catch(() => {
-        // Supabase unavailable — fall through to local-only mode
+        // Supabase unavailable or too slow — fall through to local-only mode
         setSupabaseUnavailable(true);
         setLoading(false);
       });
@@ -63,14 +97,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    try {
+      localStorage.removeItem(PRIOR_LOGIN_KEY);
+    } catch {
+      /* ignore storage failures */
+    }
     await signOut();
     setSession(null);
   }, []);
 
   // Bypass auth in local dev (no Supabase email flow needed)
   const isDevBypass = !isSupabaseConfigured() || import.meta.env.DEV;
-  const isAuthenticated = isDevBypass || !!session?.user;
-  const userEmail = session?.user?.email ?? (isDevBypass ? "dev@localhost" : null);
+  // If Supabase is unreachable but this device signed in before, let the user
+  // keep working locally rather than trapping them at a login they can't pass.
+  const offlineFallback = supabaseUnavailable && hasPriorLogin();
+  const isAuthenticated = isDevBypass || !!session?.user || offlineFallback;
+  const userEmail =
+    session?.user?.email ??
+    (isDevBypass ? "dev@localhost" : offlineFallback ? "offline" : null);
 
   if (loading) return null;
 

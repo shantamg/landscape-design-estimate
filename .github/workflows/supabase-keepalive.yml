@@ -2,18 +2,40 @@ name: Supabase Keep-Alive
 
 on:
   schedule:
-    # Every 5 days at 8am UTC
-    - cron: "0 8 */5 * *"
+    # Every 3 days at 8am UTC. Supabase free tier pauses after 7 days idle, so
+    # this leaves margin even if GitHub delays or skips a scheduled run.
+    - cron: "0 8 */3 * *"
   workflow_dispatch: # Allow manual trigger
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase
+      - name: Check secrets are configured
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          curl -sf "${{ secrets.SUPABASE_URL }}/rest/v1/settings?select=updated_at&limit=1" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -o /dev/null
-          echo "Supabase pinged successfully"
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_URL and/or SUPABASE_ANON_KEY repo secrets are not set."
+            echo "::error::Set them under Settings > Secrets and variables > Actions, or the project will pause."
+            exit 1
+          fi
+
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          code=$(curl -s -o /dev/null -w "%{http_code}" \
+            "${SUPABASE_URL}/rest/v1/settings?select=updated_at&limit=1" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}")
+          echo "Supabase responded with HTTP $code"
+          # 200 = ok; 401/404 still prove the host is awake. Anything in the
+          # 5xx range or a connection failure (000) means trouble.
+          if [ "$code" = "000" ] || [ "$code" -ge 500 ]; then
+            echo "::error::Supabase did not respond healthily (HTTP $code). It may be paused."
+            exit 1
+          fi
+          echo "Supabase is awake."
